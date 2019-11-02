@@ -1,4 +1,4 @@
-package kronos
+package main
 
 import "fmt"
 
