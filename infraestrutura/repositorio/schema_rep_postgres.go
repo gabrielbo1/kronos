@@ -185,9 +185,9 @@ func InitSchemaBd(schemas []Schema) {
 	}
 	if err != nil {
 		if err.Err != nil {
-			log.Fatal("%v, %v", err.Codigo, err.Mensagem)
+			log.Fatalf("%v, %v", err.Codigo, err.Mensagem)
 		} else {
-			log.Fatal("%v, %v. %v", err.Codigo, err.Mensagem, err.Err)
+			log.Fatalf("%v, %v, %v", err.Codigo, err.Mensagem, err.Err)
 		}
 	}
 }
