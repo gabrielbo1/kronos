@@ -21,20 +21,20 @@ func TestNewPonto(t *testing.T) {
 	}
 
 	ontem := time.Now().Add(time.Hour * 24 * -2)
-	p.Data = ontem.Format(time.RFC822)
+	p.Data = ontem.Format(time.RFC3339)
 	if e = NewPonto(&p); e == nil || e.Codigo != "PONTO30" {
 		t.Log("TestNewPonto - PONTO30")
 		t.Fail()
 	}
 
 	amanha := time.Now().Add(time.Hour * 2 * 24)
-	p.Data = amanha.Format(time.RFC822)
+	p.Data = amanha.Format(time.RFC3339)
 	if e = NewPonto(&p); e == nil || e.Codigo != "PONTO30" {
 		t.Log("TestNewPonto - PONTO30")
 		t.Fail()
 	}
 
-	p.Data = time.Now().Format(time.RFC822)
+	p.Data = time.Now().Format(time.RFC3339)
 	if e = NewPonto(&p); e != nil {
 		t.Log("TestNewPonto")
 		t.Fail()
@@ -59,13 +59,13 @@ func TestNewPontoAvulso(t *testing.T) {
 	ontem := time.Now().Add(time.Hour * 24 * -2)
 	amanha := time.Now().Add(time.Hour * 2 * 24)
 
-	p.Data = ontem.Format(time.RFC822)
+	p.Data = ontem.Format(time.RFC3339)
 	if e = NewPontoAvulso(&p); e != nil {
 		t.Log("TestNewPonto")
 		t.Fail()
 	}
 
-	p.Data = amanha.Format(time.RFC822)
+	p.Data = amanha.Format(time.RFC3339)
 	if e = NewPontoAvulso(&p); e != nil {
 		t.Log("TestNewPonto")
 		t.Fail()

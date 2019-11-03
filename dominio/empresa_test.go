@@ -16,3 +16,7 @@ func TestNewEmpresa(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func EmpresaMock() Empresa {
+	return Empresa{ID: 1, Nome: "Empresa X", Ativa: true}
+}

@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"github.com/gabrielbo1/kronos/infraestrutura"
+	"github.com/gabrielbo1/kronos/infraestrutura/repositorio"
+	_ "github.com/lib/pq"
+)
 
 func main() {
-	fmt.Print("HELLO WORD")
+	if infraestrutura.Config.DiretorioScripts != "" {
+		repositorio.ShcemaUpdate(infraestrutura.Config.DiretorioScripts)
+	}
 }
