@@ -126,7 +126,7 @@ type Pagina struct {
 // EmpresaRepositorio - Define operacoes a serem realizadas
 // com a entidade empresa.
 type EmpresaRepositorio interface {
-	Save(tx *sql.Tx, entidade dominio.Empresa) (int, *dominio.Erro)
+	Save(tx *sql.Tx, entidade dominio.Empresa) (id int, errDomin *dominio.Erro)
 
 	Update(tx *sql.Tx, entidade dominio.Empresa) *dominio.Erro
 
@@ -149,7 +149,7 @@ func NewEmpresaRepositorio() EmpresaRepositorio {
 // UsuarioRepositorio - Define operacoes a serem realizadas
 // com a entidade Usuario.
 type UsuarioRepositorio interface {
-	Save(tx *sql.Tx, entidade dominio.Usuario) (int, *dominio.Erro)
+	Save(tx *sql.Tx, entidade dominio.Usuario) (id int, errDomin *dominio.Erro)
 
 	Update(tx *sql.Tx, entidade dominio.Usuario) *dominio.Erro
 
@@ -172,7 +172,7 @@ func NewUsuarioRepositorio() UsuarioRepositorio {
 // PontoRepositorio - Define operacoes a serem realizadas
 // com a entidade Ponto.
 type PontoRepositorio interface {
-	Save(tx *sql.Tx, entidade dominio.Ponto) (int, *dominio.Erro)
+	Save(tx *sql.Tx, entidade dominio.Ponto) (id int, errDomin *dominio.Erro)
 
 	Update(tx *sql.Tx, entidade dominio.Ponto) *dominio.Erro
 

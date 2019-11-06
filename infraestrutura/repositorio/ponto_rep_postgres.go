@@ -10,7 +10,7 @@ import (
 type pontoRepPostgres string
 
 // Save - Salva uma nova ponto, implementacao Postgresql.
-func (pontoRepPostgres) Save(tx *sql.Tx, entidade dominio.Ponto) (int, *dominio.Erro) {
+func (pontoRepPostgres) Save(tx *sql.Tx, entidade dominio.Ponto) (id int, errDomin *dominio.Erro) {
 	return 0, nil
 }
 

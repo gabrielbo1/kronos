@@ -46,8 +46,7 @@ func AjustarDataPostgres(dataString string) string {
 	return strconv.Itoa(ano) + "-" + strconv.Itoa(int(mes)) + "-" + strconv.Itoa(day)
 }
 
-// PrepararStmt - Funcao generica para preparar o Stmt.
-func PrepararStmt(ctx context.Context, tx *sql.Tx, nomeRep, nomeFunc, query string) (*sql.Stmt, *dominio.Erro) {
+func prepararStmt(ctx context.Context, tx *sql.Tx, nomeRep, nomeFunc, query string) (*sql.Stmt, *dominio.Erro) {
 	stmt, err := tx.PrepareContext(ctx, query)
 	if err != nil {
 		log.Println("SQLUTIL_REP10: Erro ao preparar consulta, repositório " + nomeRep + " função " + nomeFunc)
@@ -57,9 +56,23 @@ func PrepararStmt(ctx context.Context, tx *sql.Tx, nomeRep, nomeFunc, query stri
 	return stmt, nil
 }
 
-// ScanStmt - Funcao generica para realizar o parser dos campos da consulta feita com stmt.
-func ScanStmt(ctx context.Context, nomeRep, nomeFunc string, stmt *sql.Stmt, args ...interface{}) (bool, *dominio.Erro) {
+func scanStmt(ctx context.Context, nomeRep, nomeFunc string, stmt *sql.Stmt, args ...interface{}) (bool, *dominio.Erro) {
 	err := stmt.QueryRowContext(ctx).Scan(args)
+	switch {
+	case err == sql.ErrNoRows:
+		return false, nil
+	case err != nil:
+		log.Println("Erro realizar Scan Smmt, repositório " + nomeRep + " função " + nomeFunc)
+		log.Println(err)
+		return false, &dominio.Erro{"SQLUTIL_REP20", "Erro realizar Scan Smmt, repositório " + nomeRep + " função " + nomeFunc, err}
+	default:
+		return true, nil
+	}
+	return true, nil
+}
+
+func scanParamStmt(nomeRep, nomeFunc string, stmt *sql.Stmt, query func(stmt *sql.Stmt) error) (bool, *dominio.Erro) {
+	err := query(stmt)
 	switch {
 	case err == sql.ErrNoRows:
 		return false, nil

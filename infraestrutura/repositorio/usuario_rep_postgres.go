@@ -10,7 +10,7 @@ import (
 type usuarioRepPostgres string
 
 // Save - Salva uma nova usuario, implementacao Postgresql.
-func (usuarioRepPostgres) Save(tx *sql.Tx, entidade dominio.Usuario) (int, *dominio.Erro) {
+func (usuarioRepPostgres) Save(tx *sql.Tx, entidade dominio.Usuario) (id int, errDomin *dominio.Erro) {
 	return 0, nil
 }
 
