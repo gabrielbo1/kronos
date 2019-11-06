@@ -30,5 +30,5 @@ func main() {
 		port = "80"
 	}
 
-	log.Fatal(http.ListenAndServe(port, cors.AllowAll().Handler(router)))
+	log.Fatal(http.ListenAndServe(":"+port, cors.AllowAll().Handler(router)))
 }
