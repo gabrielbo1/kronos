@@ -14,7 +14,7 @@ before_install:
   - wget -qO- https://toolbelt.heroku.com/install.sh | sh
   # login to docker registries (dockerhub + heroku)
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - echo "$HEROKU_USERNAME "| docker login --username=$HEROKU_USERNAME  --password=$HEROKU_PASSWORD registry.heroku.com
+  - echo "$HEROKU_USERNAME "| docker login --username=$HEROKU_USERNAME  --password=$HEROKU_API_KEY registry.heroku.com
 script:
   -  docker build -t gabrielbo1/kronos .
   -  docker tag gabrielbo1/kronos registry.heroku.com/$HEROKU_APP_NAME/web
