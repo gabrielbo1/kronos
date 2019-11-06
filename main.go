@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gabrielbo1/kronos/aplicacao"
 	"github.com/gabrielbo1/kronos/infraestrutura"
@@ -24,5 +25,10 @@ func main() {
 	router.PathPrefix("/").Handler(handlers.CompressHandler(stripPrefix))
 	http.Handle("/", router)
 
-	log.Fatal(http.ListenAndServe(":80", cors.AllowAll().Handler(router)))
+	port := os.Getenv("PORT") // Heroku provides the port to bind to
+	if port == "" {
+		port = "80"
+	}
+
+	log.Fatal(http.ListenAndServe(port, cors.AllowAll().Handler(router)))
 }
