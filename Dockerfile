@@ -37,5 +37,4 @@ COPY --from=builder /app/main .
 WORKDIR /root/static/
 COPY  --from=builderweb /kronos-app/dist .
 WORKDIR /root/
-EXPOSE 80
 CMD ["./main"]
