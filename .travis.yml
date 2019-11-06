@@ -9,5 +9,20 @@ addons:
     packages:
       - docker-ce
 
+before_install:
+  # install heroku CLI
+  - wget -qO- https://toolbelt.heroku.com/install.sh | sh
+  # login to docker registries (dockerhub + heroku)
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - echo "$HEROKU_PASSWORD" | docker login -u "$HEROKU_USERNAME" --password-stdin registry.heroku.com
 script:
-  -  docker build -t kronos-docker .
+  -  docker build -t gabrielbo1/kronos .
+  -  docker tag gabrielbo1/kronos registry.heroku.com/$HEROKU_APP_NAME/web
+deploy:
+  provider: script
+  script:
+    # push to dockerhub & heroku
+    docker push gabrielbo1/kronos;
+    docker push registry.heroku.com/$HEROKU_APP_NAME/web;
+  on:
+    branch: master
