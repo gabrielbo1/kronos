@@ -1,9 +1,5 @@
 language: go
 
-arch:
-  - amd64
-  - arm64
-
 sudo: required
 
 services:
