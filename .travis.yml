@@ -1,4 +1,5 @@
 language: go
+
 sudo: required
 
 services:
@@ -16,7 +17,7 @@ before_install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - echo "$HEROKU_USERNAME "| docker login --username=$HEROKU_USERNAME  --password=$HEROKU_API_KEY registry.heroku.com
 script:
-  -  docker build -t gabrielbo1/kronos .
+  -  docker build -t gabrielbo1/kronos:${TAG} .
   -  docker tag gabrielbo1/kronos registry.heroku.com/$HEROKU_APP_NAME/web
 deploy:
   provider: script
