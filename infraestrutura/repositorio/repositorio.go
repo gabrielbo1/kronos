@@ -171,7 +171,7 @@ func NewUsuarioRepositorio() UsuarioRepositorio {
 	return nil
 }
 
-// NewRotinaRepositorio - Define operacoes a serem realizadas
+// RotinaRepositorio - Define operacoes a serem realizadas
 // com a entidade Rotina
 type RotinaRepositorio interface {
 	Save(tx *sql.Tx, entidade dominio.Rotina) (int, *dominio.Erro)
