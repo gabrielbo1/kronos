@@ -85,7 +85,7 @@ func ShcemaUpdate(diretorioScripts string) *dominio.Erro {
 // de maneira que as transações fiquem aninhadas umas
 // as outras e qualquer problema a função identifica
 // e realiza o roolback da transação.
-//func (s Service) DoSomething() error {
+// func (s Service) DoSomething() error {
 //    return Transact(s.db, func (tx *scripts_sql.Tx) error {
 //        if _, err := tx.Exec(...); err != nil {
 //            return err
@@ -94,10 +94,7 @@ func ShcemaUpdate(diretorioScripts string) *dominio.Erro {
 //            return err
 //        }
 //    })
-//}
-//
-//
-//
+// }
 func Transact(db *sql.DB, txFunc func(*sql.Tx) error) (err error) {
 	tx, err := db.Begin()
 	if err != nil {
