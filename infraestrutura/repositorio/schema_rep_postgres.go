@@ -123,7 +123,7 @@ func createIfNotExistis(tx *sql.Tx) *dominio.Erro {
 // InitSchemaBd - Realiza operacao de migracao da base dados.
 func InitSchemaBd(schemas []Schema) {
 	var schemasBd []Schema
-	var err *dominio.Erro = nil
+	var err *dominio.Erro
 	var db *sql.DB
 
 	log.Println("INICIANDO MIGRACAO BASE DE DADOS: " + infraestrutura.Config.IPBanco + " - " + infraestrutura.Config.NomeBanco)

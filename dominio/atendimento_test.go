@@ -68,12 +68,3 @@ func TestNewAtendimento(t *testing.T) {
 		t.Fail()
 	}
 }
-
-func AtendimentoMock() Atendimento {
-	aten := Atendimento{ID: 1, Usuario: UsuarioMock(), Cliente: EmpresaMock()}
-	aten.HorariosAtendimento = append(aten.HorariosAtendimento, Intervalo{})
-	aten.HorariosAtendimento[0].DataInicio = time.Now().Format(time.RFC3339)
-	aten.HorariosAtendimento[0].DataFim = time.Now().Add(time.Hour).Format(time.RFC3339)
-	aten.StatusAtendimento = Fechado
-	return aten
-}

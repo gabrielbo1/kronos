@@ -35,8 +35,8 @@ func InCreate(ids []int) string {
 	return in
 }
 
-//AjustarDataPostgres - Ajusta data de acordo com o padrao para Postgresql.
-func AjustarDataPostgres(dataString string) string {
+//ajustarDataPostgres - Ajusta data de acordo com o padrao para Postgresql.
+func ajustarDataPostgres(dataString string) string {
 	var data time.Time
 	var err error
 	if data, err = time.Parse(time.RFC3339, dataString); err != nil {
@@ -44,6 +44,22 @@ func AjustarDataPostgres(dataString string) string {
 	}
 	ano, mes, day := data.Date()
 	return strconv.Itoa(ano) + "-" + strconv.Itoa(int(mes)) + "-" + strconv.Itoa(day)
+}
+
+func delete(tx *sql.Tx, nomeRep, tabela string, id int) *dominio.Erro {
+	sqlDelete := "DELETE FROM " + tabela + " WHERE id=$1"
+	stmt, err := prepararStmt(ctx, tx, nomeRep, "Delete", sqlDelete)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	if ok, errDomain := scanParamStmt("empresaRepPostgres", "Delete", stmt, func(stmt *sql.Stmt) error {
+		_, err := stmt.ExecContext(ctx, id)
+		return err
+	}); !ok {
+		return errDomain
+	}
+	return nil
 }
 
 func prepararStmt(ctx context.Context, tx *sql.Tx, nomeRep, nomeFunc, query string) (*sql.Stmt, *dominio.Erro) {

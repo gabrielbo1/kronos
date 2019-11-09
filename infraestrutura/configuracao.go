@@ -1,6 +1,6 @@
 package infraestrutura
 
-// Configuracao - Define parametros de configuracao da aplicao.
+// Configuracao - Define parâmetros de configuracao da aplicao.
 type Configuracao struct {
 	LoginAdm         string `json:"loginAdmin"`
 	SenhaAdm         string `json:"senhaAdmin"`

@@ -18,7 +18,6 @@ func NewRotina(rotina *Rotina) *Erro {
 // controle de perimissões de usuario para cada rotina
 // do sistema.
 type Acesso struct {
-	ID         int    `json:"id"`
 	Rotina     Rotina `json:"rotina"`
 	Criar      bool   `json:"criar"`
 	Atualizar  bool   `json:"atualizar"`

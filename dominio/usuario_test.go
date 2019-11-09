@@ -18,10 +18,6 @@ func TestNewRotina(t *testing.T) {
 	}
 }
 
-func RotinaMock() Rotina {
-	return Rotina{ID: 1, Rotina: "/CadUsuario"}
-}
-
 func TestNewAcesso(t *testing.T) {
 	a := Acesso{}
 	var e *Erro
@@ -38,10 +34,6 @@ func TestNewAcesso(t *testing.T) {
 		t.Log("TestNewAcesso")
 		t.Fail()
 	}
-}
-
-func AcessoMock() Acesso {
-	return Acesso{ID: 1, Rotina: RotinaMock(), Criar: true}
 }
 
 func TestNewUsuario(t *testing.T) {
@@ -79,15 +71,4 @@ func TestNewUsuario(t *testing.T) {
 		t.Log("TestNewUsuario")
 		t.Fail()
 	}
-}
-
-func UsuarioMock() Usuario {
-	usu := Usuario{
-		ID:    1,
-		Nome:  "gabriel",
-		Login: "gbo",
-		Senha: "pass123",
-	}
-	usu.Acesso = append(usu.Acesso, AcessoMock())
-	return usu
 }

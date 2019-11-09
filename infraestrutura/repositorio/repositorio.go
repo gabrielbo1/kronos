@@ -21,23 +21,26 @@ const POSTGRES SGDB = "POSTGRES"
 //DB - Conexao com banco de dados.
 var DB *sql.DB
 
+func stringConexaoPostgres(confg infraestrutura.Configuracao) string {
+	connString := "host="
+	connString += confg.IPBanco
+	connString += " user="
+	connString += confg.UsuarioBanco
+	connString += " dbname="
+	connString += confg.NomeBanco
+	connString += "  password='"
+	connString += confg.SenhaBanco + "'"
+	connString += " sslmode=disable"
+	return connString
+}
+
 // BuscaConexao - Busca conexacao com banco de dados.
 func buscaConexao() (DB *sql.DB, errDomin *dominio.Erro) {
 	if DB == nil {
 		switch SGDB(infraestrutura.Config.Banco) {
 		case POSTGRES:
-			connString := "host="
-			connString += infraestrutura.Config.IPBanco
-			connString += " user="
-			connString += infraestrutura.Config.UsuarioBanco
-			connString += " dbname="
-			connString += infraestrutura.Config.NomeBanco
-			connString += "  password='"
-			connString += infraestrutura.Config.SenhaBanco + "'"
-			connString += " sslmode=disable"
-
 			var err error
-			DB, err = sql.Open("postgres", connString)
+			DB, err = sql.Open("postgres", stringConexaoPostgres(infraestrutura.Config))
 			if err != nil {
 				log.Fatal(err)
 				return nil, &dominio.Erro{"CON_10", "Erro banco FindDb", err}
@@ -48,7 +51,7 @@ func buscaConexao() (DB *sql.DB, errDomin *dominio.Erro) {
 	return nil, &dominio.Erro{Codigo: "REPOSITORIO10", Mensagem: "Banco de dados nao suportado ou erro na conexao."}
 }
 
-//SchemaUpdate Executa migracao
+// ShcemaUpdate -  Executa migracao.
 func ShcemaUpdate(diretorioScripts string) *dominio.Erro {
 	var e *dominio.Erro
 	switch SGDB(infraestrutura.Config.Banco) {
@@ -126,7 +129,7 @@ type Pagina struct {
 // EmpresaRepositorio - Define operacoes a serem realizadas
 // com a entidade empresa.
 type EmpresaRepositorio interface {
-	Save(tx *sql.Tx, entidade dominio.Empresa) (id int, errDomin *dominio.Erro)
+	Save(tx *sql.Tx, entidade dominio.Empresa) *dominio.Erro
 
 	Update(tx *sql.Tx, entidade dominio.Empresa) *dominio.Erro
 
@@ -149,13 +152,15 @@ func NewEmpresaRepositorio() EmpresaRepositorio {
 // UsuarioRepositorio - Define operacoes a serem realizadas
 // com a entidade Usuario.
 type UsuarioRepositorio interface {
-	Save(tx *sql.Tx, entidade dominio.Usuario) (id int, errDomin *dominio.Erro)
+	Save(tx *sql.Tx, entidade dominio.Usuario) (int, *dominio.Erro)
 
 	Update(tx *sql.Tx, entidade dominio.Usuario) *dominio.Erro
 
 	Delete(tx *sql.Tx, entidade dominio.Usuario) *dominio.Erro
 
 	FindAll(tx *sql.Tx) (entidades []dominio.Usuario, erro *dominio.Erro)
+
+	Login(tx *sql.Tx, login, senha string) (dominio.Usuario, *dominio.Erro)
 }
 
 //NewUsuarioRepositorio - Retorna repositorio de usuario.
@@ -169,10 +174,33 @@ func NewUsuarioRepositorio() UsuarioRepositorio {
 	return nil
 }
 
+// NewRotinaRepositorio - Define operacoes a serem realizadas
+// com a entidade Rotina
+type RotinaRepositorio interface {
+	Save(tx *sql.Tx, entidade dominio.Rotina) (int, *dominio.Erro)
+
+	Update(tx *sql.Tx, entidade dominio.Rotina) *dominio.Erro
+
+	Delete(tx *sql.Tx, entidade dominio.Rotina) *dominio.Erro
+
+	FindAll(tx *sql.Tx) (entidades []dominio.Rotina, erro *dominio.Erro)
+}
+
+// NewRotinaRepositorio - Retorna repositorio de rotina.
+func NewRotinaRepositorio() RotinaRepositorio {
+	switch SGDB(infraestrutura.Config.Banco) {
+	case POSTGRES:
+		var rep rotinaRepPostgres
+		rep = "rotina_rep_postgres"
+		return rep
+	}
+	return nil
+}
+
 // PontoRepositorio - Define operacoes a serem realizadas
 // com a entidade Ponto.
 type PontoRepositorio interface {
-	Save(tx *sql.Tx, entidade dominio.Ponto) (id int, errDomin *dominio.Erro)
+	Save(tx *sql.Tx, entidade dominio.Ponto) (int, *dominio.Erro)
 
 	Update(tx *sql.Tx, entidade dominio.Ponto) *dominio.Erro
 
@@ -185,6 +213,27 @@ func NewPontoRepositorio() PontoRepositorio {
 	case POSTGRES:
 		var rep pontoRepPostgres
 		rep = "ponto_rep_postgres"
+		return rep
+	}
+	return nil
+}
+
+// AtendimentoRepositorio - Define operacoes a serem realizadas
+// com a entidade Ponto.
+type AtendimentoRepositorio interface {
+	Save(tx *sql.Tx, entidade dominio.Atendimento) (int, *dominio.Erro)
+
+	Update(tx *sql.Tx, entidade dominio.Atendimento) *dominio.Erro
+
+	Delete(tx *sql.Tx, entidade dominio.Atendimento) *dominio.Erro
+}
+
+// NewRepositorioAtendimento -  Retorna repositorio de atendimento
+func NewRepositorioAtendimento() AtendimentoRepositorio {
+	switch SGDB(infraestrutura.Config.Banco) {
+	case POSTGRES:
+		var rep atendimentoRepPostgres
+		rep = "atendimento_rep_postgres"
 		return rep
 	}
 	return nil
