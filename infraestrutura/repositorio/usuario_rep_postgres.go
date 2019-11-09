@@ -45,15 +45,14 @@ func (usuarioRepPostgres) Update(tx *sql.Tx, entidade dominio.Usuario) *dominio.
 	}
 	defer stmt.Close()
 
-	jsonAcesso := ""
-	if jsonBytes, err := json.Marshal(&entidade.Acesso); err != nil {
-		return &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro usuarioRepPostgres função Save", Err: err}
-	} else {
-		jsonAcesso = string(jsonBytes)
+	var jsonBytes []byte
+	var errJson error
+	if jsonBytes, errJson = json.Marshal(&entidade.Acesso); err != nil {
+		return &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro usuarioRepPostgres função Save", Err: errJson}
 	}
 
 	if ok, errDomain := scanParamStmt("usuarioRepPostgres", "Update", stmt, func(stmt *sql.Stmt) error {
-		_, err := stmt.ExecContext(ctx, &entidade.Nome, entidade.Login, jsonAcesso, entidade.ID)
+		_, err := stmt.ExecContext(ctx, &entidade.Nome, entidade.Login, string(jsonBytes), entidade.ID)
 		return err
 	}); !ok {
 		return errDomain
