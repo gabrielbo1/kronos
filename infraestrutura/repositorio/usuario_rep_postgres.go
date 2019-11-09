@@ -21,16 +21,15 @@ func (usuarioRepPostgres) Save(tx *sql.Tx, entidade dominio.Usuario) (int, *domi
 	}
 	defer stmt.Close()
 
-	jsonAcesso := ""
-	if jsonBytes, err := json.Marshal(&entidade.Acesso); err != nil {
-		return 0, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro usuarioRepPostgres função Save", Err: err}
-	} else {
-		jsonAcesso = string(jsonBytes)
+	var jsonBytes []byte
+	var errJson error
+	if jsonBytes, errJson = json.Marshal(&entidade.Acesso); err != nil {
+		return 0, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro usuarioRepPostgres função Save", Err: errJson}
 	}
 
 	id := 0
 	if ok, errDomin := scanParamStmt("usuarioRepPostgres", "Save", stmt, func(stmt *sql.Stmt) error {
-		return stmt.QueryRowContext(ctx, &entidade.Nome, &entidade.Login, fmt.Sprintf("%x", sha256.Sum256([]byte(entidade.Senha))), jsonAcesso).Scan(&id)
+		return stmt.QueryRowContext(ctx, &entidade.Nome, &entidade.Login, fmt.Sprintf("%x", sha256.Sum256([]byte(entidade.Senha))), string(jsonBytes)).Scan(&id)
 	}); !ok {
 		return 0, errDomin
 	}
