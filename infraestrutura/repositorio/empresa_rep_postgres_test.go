@@ -45,7 +45,7 @@ func TestEmpresaRepPostgres_Save(t *testing.T) {
 	}
 
 	emp := dominio.EmpresaMock()
-	if errDomin := rep.Save(tx, emp); errDomin != nil {
+	if _, errDomin := rep.Save(tx, emp); errDomin != nil {
 		t.Error(errDomin)
 		t.Fail()
 	}
@@ -64,16 +64,17 @@ func TestEmpresaRepPostgres_Update(t *testing.T) {
 	}
 
 	emp := dominio.EmpresaMock()
+	var errDominio *dominio.Erro
 
-	errDomin := rep.Save(tx, emp)
-	if errDomin != nil {
-		t.Error(errDomin)
+	emp.ID, errDominio = rep.Save(tx, emp)
+	if errDominio != nil {
+		t.Error(errDominio)
 		t.Fail()
 	}
 
 	emp.Nome = "abc"
-	if errDomin = rep.Update(tx, emp); errDomin != nil {
-		t.Error(errDomin)
+	if errDominio = rep.Update(tx, emp); errDominio != nil {
+		t.Error(errDominio)
 		t.Fail()
 	}
 
@@ -91,15 +92,16 @@ func TestEmpresaRepPostgres_Delete(t *testing.T) {
 	}
 
 	emp := dominio.EmpresaMock()
+	var errDominio *dominio.Erro
 
-	errDomin := rep.Save(tx, emp)
-	if errDomin != nil {
-		t.Error(errDomin)
+	emp.ID, errDominio = rep.Save(tx, emp)
+	if errDominio != nil {
+		t.Error(errDominio)
 		t.Fail()
 	}
 
-	if errDomin = rep.Delete(tx, emp); errDomin != nil {
-		t.Error(errDomin)
+	if errDominio = rep.Delete(tx, emp); errDominio != nil {
+		t.Error(errDominio)
 		t.Fail()
 	}
 }
@@ -116,7 +118,7 @@ func TestEmpresaRepPostgres_FindAll(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		if errDomin := rep.Save(tx, dominio.EmpresaMock()); errDomin != nil {
+		if _, errDomin := rep.Save(tx, dominio.EmpresaMock()); errDomin != nil {
 			t.Error(errDomin)
 			t.Fail()
 		}

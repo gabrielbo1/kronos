@@ -192,3 +192,43 @@ func TestUsuarioRepPostgres_Login(t *testing.T) {
 
 	t.Log(usu)
 }
+
+func TestUsuarioRepPostgres_BuscaLogin(t *testing.T) {
+	db, destruirBd := preparePostgresDB(t)
+	defer destruirBd()
+	defer db.Close()
+
+	repAcesso := NewRotinaRepositorio()
+	tx, err := db.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rot := dominio.RotinaMock()
+	var errDomin *dominio.Erro
+	rot.ID, errDomin = repAcesso.Save(tx, rot)
+
+	if errDomin != nil {
+		t.Error(errDomin)
+		t.Fail()
+	}
+
+	usu := dominio.UsuarioMock()
+	usu.Acesso = []dominio.Acesso{}
+	usu.Acesso = append(usu.Acesso, dominio.AcessoMock())
+	usu.Acesso[0].Rotina = rot
+
+	rep := NewUsuarioRepositorio()
+	if usu.ID, errDomin = rep.Save(tx, usu); errDomin != nil {
+		t.Error(errDomin)
+		t.Fail()
+	}
+
+	if usu, err := rep.BuscaLogin(tx, usu.Login); err != nil || usu.ID == 0 {
+		t.Error(errDomin)
+		t.Fail()
+	}
+
+	t.Log(usu)
+
+}

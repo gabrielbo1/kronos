@@ -80,13 +80,36 @@ func (usuarioRepPostgres) FindAll(tx *sql.Tx) (entidades []dominio.Usuario, erro
 
 func (usuarioRepPostgres) Login(tx *sql.Tx, login, senha string) (dominio.Usuario, *dominio.Erro) {
 	sqlQuery := "SELECT id, nome, login, senha, acesso FROM usuario WHERE login = $1 AND senha = $2"
-	stmt, errDomin := prepararStmt(ctx, tx, "Login", "FindById", sqlQuery)
+	stmt, errDomin := prepararStmt(ctx, tx, "usuarioRepPostgres", "Login", sqlQuery)
 	if errDomin != nil {
 		return dominio.Usuario{}, errDomin
 	}
 	defer stmt.Close()
 
 	rows, errTx := stmt.QueryContext(ctx, login, fmt.Sprintf("%x", sha256.Sum256([]byte(senha))))
+	if errTx != nil {
+		return dominio.Usuario{}, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Login usuarioRepPostgres função Login", Err: errTx}
+	}
+
+	usuarios, err := parseUsuarioPostgres(rows)
+	if err != nil {
+		return dominio.Usuario{}, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Login usuarioRepPostgres função Login", Err: err}
+	}
+	if len(usuarios) != 0 {
+		return usuarios[0], nil
+	}
+	return dominio.Usuario{}, nil
+}
+
+func (usuarioRepPostgres) BuscaLogin(tx *sql.Tx, login string) (dominio.Usuario, *dominio.Erro) {
+	sqlQuery := "SELECT id, nome, login, senha, acesso FROM usuario WHERE login = $1"
+	stmt, errDomin := prepararStmt(ctx, tx, "usuarioRepPostgres", "BuscaLogin", sqlQuery)
+	if errDomin != nil {
+		return dominio.Usuario{}, errDomin
+	}
+	defer stmt.Close()
+
+	rows, errTx := stmt.QueryContext(ctx, login)
 	if errTx != nil {
 		return dominio.Usuario{}, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Login usuarioRepPostgres função Login", Err: errTx}
 	}

@@ -10,19 +10,20 @@ import (
 type empresaRepPostgres string
 
 // Save - Salva uma nova empresa, implementacao Postgresql.
-func (empresaRepPostgres) Save(tx *sql.Tx, entidade dominio.Empresa) *dominio.Erro {
+func (empresaRepPostgres) Save(tx *sql.Tx, entidade dominio.Empresa) (int, *dominio.Erro) {
 	sqlInsert := `INSERT INTO empresa(nome_empresa, ativa) VALUES ($1, $2) RETURNING ID`
 	stmt, err := prepararStmt(ctx, tx, "empresaRepPostgres", "Save", sqlInsert)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer stmt.Close()
+	id := 0
 	if ok, errDomin := scanParamStmt("empresaRepPostgres", "Save", stmt, func(stmt *sql.Stmt) error {
-		return stmt.QueryRowContext(ctx, &entidade.Nome, &entidade.Ativa).Scan(&entidade.ID)
+		return stmt.QueryRowContext(ctx, &entidade.Nome, &entidade.Ativa).Scan(&id)
 	}); !ok {
-		return errDomin
+		return 0, errDomin
 	}
-	return nil
+	return id, nil
 }
 
 // Update - Atualiza um empresa, implementacao Postgresql.

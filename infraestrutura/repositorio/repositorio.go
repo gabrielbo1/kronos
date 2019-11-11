@@ -126,7 +126,7 @@ type Pagina struct {
 // EmpresaRepositorio - Define operacoes a serem realizadas
 // com a entidade empresa.
 type EmpresaRepositorio interface {
-	Save(tx *sql.Tx, entidade dominio.Empresa) *dominio.Erro
+	Save(tx *sql.Tx, entidade dominio.Empresa) (int, *dominio.Erro)
 
 	Update(tx *sql.Tx, entidade dominio.Empresa) *dominio.Erro
 
@@ -158,6 +158,8 @@ type UsuarioRepositorio interface {
 	FindAll(tx *sql.Tx) (entidades []dominio.Usuario, erro *dominio.Erro)
 
 	Login(tx *sql.Tx, login, senha string) (dominio.Usuario, *dominio.Erro)
+
+	BuscaLogin(tx *sql.Tx, login string) (dominio.Usuario, *dominio.Erro)
 }
 
 //NewUsuarioRepositorio - Retorna repositorio de usuario.
