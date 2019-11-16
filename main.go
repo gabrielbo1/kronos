@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/rs/cors"
-	"github.com/urfave/negroni"
 	"net/http"
 	"os"
+
+	"github.com/gabrielbo1/kronos/infraestrutura/repositorio"
+	"github.com/rs/cors"
+	"github.com/urfave/negroni"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gabrielbo1/kronos/infraestrutura"
-	"github.com/gabrielbo1/kronos/infraestrutura/repositorio"
 	"github.com/gabrielbo1/kronos/visao"
 	"github.com/gorilla/handlers"
 	_ "github.com/lib/pq"
@@ -22,9 +23,7 @@ func init() {
 
 func main() {
 	infraestrutura.ConfigInit()
-	if infraestrutura.Config.DiretorioScripts != "" {
-		repositorio.ShcemaUpdate(infraestrutura.Config.DiretorioScripts)
-	}
+	repositorio.ShcemaUpdate(infraestrutura.Config.DiretorioScripts)
 
 	staticDir := "./static"
 	stripPrefix := http.StripPrefix("/", http.FileServer(http.Dir(staticDir)))
