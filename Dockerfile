@@ -11,6 +11,13 @@ WORKDIR dominio
 RUN go test -v
 RUN go test -cover
 
+WORKDIR /app
+WORKDIR infraestrutura
+WORKDIR cript
+RUN go test -v
+RUN go test -cover
+
+
 
 # Fim Testes Inicio BUILD.
 WORKDIR /app

@@ -11,18 +11,17 @@ func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range rotas {
 
-		//HANDLER DE LOG
-		var logHandler http.Handler
-		logHandler = route.HandlerFunc
-		logHandler = logger(logHandler, route.Name)
+		//HANDLER ATUH
+		var authHandler http.Handler
+		authHandler = route.HandlerFunc
+		authHandler = basicAuth(authHandler, route.Name)
 
-		if route.Name == "Index" ||
-			route.Name == "PostLoginUsuario" {
+		if route.Name == "PostLoginUsuario" {
 			router.
 				Methods(route.Method).
 				Path(route.Pattern).
-				Name(route.Name).
-				Handler(logHandler)
+				Handler(route.HandlerFunc).
+				Name(route.Name)
 			continue
 		}
 
@@ -30,7 +29,8 @@ func NewRouter() *mux.Router {
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
-			Handler(logHandler)
+			Handler(route.HandlerFunc).
+			Handler(authHandler)
 	}
 	return router
 }

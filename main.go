@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/rs/cors"
+	"github.com/urfave/negroni"
 	"net/http"
 	"os"
 
@@ -11,12 +13,11 @@ import (
 	"github.com/gabrielbo1/kronos/visao"
 	"github.com/gorilla/handlers"
 	_ "github.com/lib/pq"
-	"github.com/rs/cors"
 )
 
 func init() {
 	// Only log the warning severity or above.
-	log.SetLevel(log.WarnLevel)
+	log.SetLevel(log.InfoLevel)
 }
 
 func main() {
@@ -36,5 +37,7 @@ func main() {
 		port = "8080"
 	}
 
-	log.Fatal(http.ListenAndServe(":"+port, cors.AllowAll().Handler(router)))
+	n := negroni.Classic()
+	n.UseHandler(cors.AllowAll().Handler(router))
+	n.Run(":" + port)
 }

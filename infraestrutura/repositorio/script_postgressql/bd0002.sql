@@ -1,0 +1,1 @@
+INSERT INTO USUARIO (nome, login, senha, acesso) VALUES ('kronos', 'kronoslogin', '64262d00b207ed40a8bc5ee4dbae61199b22fd49b8f88a3b76a851e8c14bc8d4', '[]')

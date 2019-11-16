@@ -23,5 +23,5 @@ var Config Configuracao = Configuracao{
 	PortaBanco:       5432,
 	UsuarioBanco:     "kronospostgres",
 	SenhaBanco:       "123456",
-	DiretorioScripts: "",
+	DiretorioScripts: "infraestrutura/repositorio/script_postgressql",
 }

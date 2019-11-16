@@ -86,7 +86,7 @@ func (usuarioRepPostgres) Login(tx *sql.Tx, login, senha string) (dominio.Usuari
 	}
 	defer stmt.Close()
 
-	rows, errTx := stmt.QueryContext(ctx, login, fmt.Sprintf("%x", sha256.Sum256([]byte(senha))))
+	rows, errTx := stmt.QueryContext(ctx, login, senha)
 	if errTx != nil {
 		return dominio.Usuario{}, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Login usuarioRepPostgres função Login", Err: errTx}
 	}

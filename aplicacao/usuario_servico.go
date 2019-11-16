@@ -1,9 +1,12 @@
 package aplicacao
 
 import (
+	"crypto/sha256"
 	"database/sql"
-
+	"encoding/base64"
+	"fmt"
 	"github.com/gabrielbo1/kronos/dominio"
+	"github.com/gabrielbo1/kronos/infraestrutura/cript"
 	"github.com/gabrielbo1/kronos/infraestrutura/repositorio"
 )
 
@@ -76,10 +79,18 @@ func BuscarUsuarios() (usuarios []dominio.Usuario, errDominio *dominio.Erro) {
 // Login - Login usuario e senha.
 func Login(login, senha string) (usuario dominio.Usuario, errDominio *dominio.Erro) {
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
+		if len(senha) != 64 {
+			senha = fmt.Sprintf("%x", sha256.Sum256([]byte(senha)))
+		}
 		usuario, errDominio = repUsuario.Login(tx, login, senha)
 		return nil
 	}); errTX != nil {
 		return usuario, TrataErroConexao(errDominio, errTX)
 	}
+
+	//Token
+	_, token := cript.RsaToken.Criptografar([]byte(usuario.Senha))
+	usuario.Senha = string(base64.StdEncoding.EncodeToString(token))
+
 	return usuario, errDominio
 }

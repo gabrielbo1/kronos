@@ -2,95 +2,95 @@ package visao
 
 import "net/http"
 
-type route struct {
+type Route struct {
 	Name        string
 	Method      string
 	Pattern     string
 	HandlerFunc http.HandlerFunc
 }
 
-type routes []route
+type Routes []Route
 
-var rotas = routes{
-	route{
+var rotas = Routes{
+	Route{
 		Name:        "PostAtendimento",
 		Method:      "POST",
 		Pattern:     "/atendimento",
 		HandlerFunc: PostAtendimento,
 	},
-	route{
+	Route{
 		Name:        "PutAtendimento",
 		Method:      "PUT",
 		Pattern:     "/atendimento",
 		HandlerFunc: PutAtendimento,
 	},
-	route{
+	Route{
 		Name:        "DeleteAtendimento",
 		Method:      "DELETE",
 		Pattern:     "/atendimento",
 		HandlerFunc: DeleteAtendimento,
 	},
-	route{
+	Route{
 		Name:        "PostEmpresa",
 		Method:      "POST",
 		Pattern:     "/empresa",
 		HandlerFunc: PostEmpresa,
 	},
-	route{
+	Route{
 		Name:        "PutEmpresa",
 		Method:      "PUT",
 		Pattern:     "/empresa",
 		HandlerFunc: PutEmpresa,
 	},
-	route{
+	Route{
 		Name:        "DeleteEmpresa",
 		Method:      "DELETE",
 		Pattern:     "/empresa",
 		HandlerFunc: DeleteEmpresa,
 	},
-	route{
+	Route{
 		Name:        "GetEmpresas",
 		Method:      "GET",
 		Pattern:     "/empresa",
 		HandlerFunc: GetEmpresas,
 	},
-	route{
+	Route{
 		Name:        "PostPonto",
 		Method:      "POST",
 		Pattern:     "/ponto",
 		HandlerFunc: PostPonto,
 	},
-	route{
+	Route{
 		Name:        "PutPonto",
 		Method:      "PUT",
 		Pattern:     "/ponto",
 		HandlerFunc: PutPonto,
 	},
-	route{
+	Route{
 		Name:        "DeletePonto",
 		Method:      "DELETE",
 		Pattern:     "/ponto",
 		HandlerFunc: DeletePonto,
 	},
-	route{
+	Route{
 		Name:        "PostUsuario",
 		Method:      "POST",
 		Pattern:     "/usuario",
 		HandlerFunc: PostUsuario,
 	},
-	route{
+	Route{
 		Name:        "PutUsuario",
 		Method:      "PUT",
 		Pattern:     "/usuario",
 		HandlerFunc: PutUsuario,
 	},
-	route{
+	Route{
 		Name:        "GetUsuarios",
 		Method:      "GET",
 		Pattern:     "/usuario",
 		HandlerFunc: GetUsuarios,
 	},
-	route{
+	Route{
 		Name:        "PostLoginUsuario",
 		Method:      "POST",
 		Pattern:     "/usuario/login",
