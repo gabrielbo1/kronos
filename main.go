@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/gabrielbo1/kronos/infraestrutura/repositorio"
 	"net/http"
 	"os"
 
-	"github.com/gabrielbo1/kronos/infraestrutura/repositorio"
 	"github.com/rs/cors"
 	"github.com/urfave/negroni"
 
@@ -23,7 +23,9 @@ func init() {
 
 func main() {
 	infraestrutura.ConfigInit()
+	log.Info("INICIANDO BANCO DE DADOS.")
 	repositorio.ShcemaUpdate(infraestrutura.Config.DiretorioScripts)
+	log.Info("FIM MIGRACAO BANCO DE DADOS.")
 
 	staticDir := "./static"
 	stripPrefix := http.StripPrefix("/", http.FileServer(http.Dir(staticDir)))
