@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gabrielbo1/kronos/infraestrutura"
 
@@ -56,6 +57,7 @@ func ShcemaUpdate(diretorioScripts string) *dominio.Erro {
 	var e *dominio.Erro
 	switch SGDB(infraestrutura.Config.Banco) {
 	case POSTGRES:
+		log.Info("CONEXAO POSTGRES")
 		if DB, e = buscaConexao(); e != nil {
 			return e
 		}
@@ -64,6 +66,8 @@ func ShcemaUpdate(diretorioScripts string) *dominio.Erro {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		log.Infof("QUANTIDADE DE SCRIPTS %d.", len(files))
 
 		var schemas []Schema
 		for _, f := range files {
