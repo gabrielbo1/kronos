@@ -30,7 +30,7 @@ func stringConexaoPostgres(confg infraestrutura.Configuracao) string {
 	connString += confg.NomeBanco
 	connString += "  password='"
 	connString += confg.SenhaBanco + "'"
-	connString += " sslmode=disable"
+	connString += " sslmode=" + confg.SslBanco
 	return connString
 }
 

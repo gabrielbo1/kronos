@@ -15,6 +15,7 @@ type Configuracao struct {
 	PortaBanco       int    `json:"portaBanco"`
 	UsuarioBanco     string `json:"usuarioBanco"`
 	SenhaBanco       string `json:"senhaBanco"`
+	SslBanco         string `json:"sslBanco"`
 	DiretorioScripts string `json:"diretorioScripts"`
 }
 
@@ -28,12 +29,8 @@ var Config Configuracao = Configuracao{
 	PortaBanco:       5432,
 	UsuarioBanco:     "kronospostgres",
 	SenhaBanco:       "123456",
+	SslBanco:         "disable",
 	DiretorioScripts: "./infraestrutura/repositorio/script_postgressql",
-}
-
-func osParam(param string) string {
-	p := os.Getenv("HOST_POSTGRES") // Heroku provides the port to bind to
-	return p
 }
 
 // ConfigInit - Chega parametros e ajusta configuracao
@@ -52,5 +49,8 @@ func ConfigInit() {
 	}
 	if p := os.Getenv("SENHA_POSTGRES"); p != "" {
 		Config.SenhaBanco = p
+	}
+	if p := os.Getenv("SSL_BANCO"); p != "" {
+		Config.SslBanco = p
 	}
 }
