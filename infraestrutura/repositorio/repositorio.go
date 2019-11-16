@@ -37,12 +37,15 @@ func stringConexaoPostgres(confg infraestrutura.Configuracao) string {
 
 // BuscaConexao - Busca conexacao com banco de dados.
 func buscaConexao() (DB *sql.DB, errDomin *dominio.Erro) {
+	log.Infof("BUSCANDO CONECAO COM BANCO DE DADOS.")
 	if DB == nil {
 		switch SGDB(infraestrutura.Config.Banco) {
 		case POSTGRES:
+			log.Infof("BANCO POSTGESQL.")
 			var err error
 			DB, err = sql.Open("postgres", stringConexaoPostgres(infraestrutura.Config))
 			if err != nil {
+				log.Infof("FATAL ERROR CONEXAO POSTGRESQL.")
 				log.Fatal(err)
 				return nil, &dominio.Erro{"CON_10", "Erro banco FindDb", err}
 			}
