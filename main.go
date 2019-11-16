@@ -21,6 +21,7 @@ func init() {
 }
 
 func main() {
+	infraestrutura.ConfigInit()
 	if infraestrutura.Config.DiretorioScripts != "" {
 		repositorio.ShcemaUpdate(infraestrutura.Config.DiretorioScripts)
 	}

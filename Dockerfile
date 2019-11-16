@@ -41,6 +41,9 @@ FROM alpine:3.10.3
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/main .
+WORKDIR /root/infraestrutura/repositorio/script_postgressql/
+COPY --from=builder /app/infraestrutura/repositorio/script_postgressql .
+WORKDIR /root/
 WORKDIR /root/static/
 COPY  --from=builderweb /kronos-app/dist .
 WORKDIR /root/

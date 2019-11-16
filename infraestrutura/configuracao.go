@@ -1,5 +1,10 @@
 package infraestrutura
 
+import (
+	"os"
+	"strconv"
+)
+
 // Configuracao - Define parâmetros de configuracao da aplicao.
 type Configuracao struct {
 	LoginAdm         string `json:"loginAdmin"`
@@ -23,5 +28,29 @@ var Config Configuracao = Configuracao{
 	PortaBanco:       5432,
 	UsuarioBanco:     "kronospostgres",
 	SenhaBanco:       "123456",
-	DiretorioScripts: "infraestrutura/repositorio/script_postgressql",
+	DiretorioScripts: "./infraestrutura/repositorio/script_postgressql",
+}
+
+func osParam(param string) string {
+	p := os.Getenv("HOST_POSTGRES") // Heroku provides the port to bind to
+	return p
+}
+
+// ConfigInit - Chega parametros e ajusta configuracao
+func ConfigInit() {
+	if p := os.Getenv("HOST_POSTGRES"); p != "" {
+		Config.IPBanco = p
+	}
+	if p := os.Getenv("PORTA_POSTGRES"); p != "" {
+		Config.PortaBanco, _ = strconv.Atoi(p)
+	}
+	if p := os.Getenv("BANCO_POSTGRES"); p != "" {
+		Config.Banco = p
+	}
+	if p := os.Getenv("USUARIO_POSTGRES"); p != "" {
+		Config.UsuarioBanco = p
+	}
+	if p := os.Getenv("SENHA_POSTGRES"); p != "" {
+		Config.SenhaBanco = p
+	}
 }
