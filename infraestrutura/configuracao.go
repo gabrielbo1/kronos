@@ -42,7 +42,7 @@ func ConfigInit() {
 		Config.PortaBanco, _ = strconv.Atoi(p)
 	}
 	if p := os.Getenv("BANCO_POSTGRES"); p != "" {
-		Config.Banco = p
+		Config.NomeBanco = p
 	}
 	if p := os.Getenv("USUARIO_POSTGRES"); p != "" {
 		Config.UsuarioBanco = p
