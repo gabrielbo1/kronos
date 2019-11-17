@@ -84,6 +84,8 @@ func ShcemaUpdate(diretorioScripts string) *dominio.Erro {
 		}
 		InitSchemaBd(schemas)
 		return nil
+	default:
+		log.Fatal("BANCO DE DADOS NAO RECONHECIDO")
 	}
 	return nil
 }
