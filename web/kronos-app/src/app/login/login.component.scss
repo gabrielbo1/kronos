@@ -1,0 +1,22 @@
+.container-login {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 150px;
+    max-width: 500px;
+    width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+}
+  
+.login-container > * {
+    width: 100%;
+}

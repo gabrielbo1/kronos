@@ -1,0 +1,27 @@
+<div class="container-login">
+    <div fxLayout="row" fxFlex="container" fxLayout.xs="column" fxLayoutAlign="center">
+        <mat-card fxFlex="100%">
+            <mat-card-header fxLayoutAlign="center">
+                <mat-card-title>
+                    <h1 class="mat-1">
+                        KRONOS
+                        <mat-icon aria-hidden="false" color="primary">calendar_today</mat-icon>
+                    </h1>
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="login-container">
+                    <mat-form-field [style.font-size.px]="'20'">
+                        <input matInput [(ngModel)]="usuario.login" placeholder="Login">
+                    </mat-form-field>
+                    <mat-form-field [style.font-size.px]="'20'">
+                        <input type="password" [(ngModel)]="usuario.senha" matInput placeholder="Senha">
+                    </mat-form-field>
+                </div>
+            </mat-card-content>
+            <mat-card-footer class="login-container">
+                <button  [style.font-size.px]="'20'" mat-stroked-button (click)="login()" color="primary">Login</button>
+            </mat-card-footer>
+        </mat-card>
+    </div>
+</div>
