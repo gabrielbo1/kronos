@@ -1,6 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -31,10 +30,7 @@ import { LoginComponent } from './login/login.component';
     SimpleNotificationsModule.forRoot({
       position: ["top", "right"],
     }),
-    RouterModule.forRoot([
-      {path: '', component: LoginComponent},
-      {path: 'login', component: LoginComponent}
-    ])
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]

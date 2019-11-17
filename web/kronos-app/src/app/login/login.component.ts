@@ -24,6 +24,7 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
+    DnsWebService.storageTokenUsuarioAdm = '';
   }
 
   login() {
@@ -49,14 +50,8 @@ export class LoginComponent implements OnInit {
           });  
         })
         .subscribe(m => {
-          console.log(m)
-          if (m.mensagem !== undefined) {
-            const toast = this.notificationsService.success('LOGIN', m.mensagem, {
-              timeOut: 3000,
-              showProgressBar: true,
-              pauseOnHover: true,
-              clickToClose: true,
-            }); 
+          if (m.mensagem !== undefined && m.mensagem === 'OK') {
+            this.router.navigate(['kronos']);
           }
         })
     });

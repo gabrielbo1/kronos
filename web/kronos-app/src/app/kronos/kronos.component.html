@@ -1,0 +1,50 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <button mat-icon-button>
+      <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
+    </button>
+    <h1>Kronos</h1>
+    <span class="menu-spacer"></span>
+    <div>
+      <a mat-button [routerLink]="'/kronos/ponto'" [style.font-size.px]="'17'"> Ponto </a>
+      <a mat-button [routerLink]="'/kronos//atendimento'" [style.font-size.px]="'17'"> Atendimento </a>
+      <a mat-button [routerLink]="'/kronos//relatorio'" [style.font-size.px]="'17'"> Rel&aacute;torios </a>
+    </div>
+  </mat-toolbar-row>
+
+  <mat-toolbar-row>
+    <span style="font-size: 15px;">Sistema para registro de pontos e controle de horas</span>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<mat-sidenav-container>
+  <mat-sidenav #sidenav>
+    <mat-nav-list>
+
+      <a mat-list-item (click)="sidenav.toggle()" [routerLink]="'/kronos/ponto'"> Ponto </a>
+      <a mat-list-item (click)="sidenav.toggle()" [routerLink]="'/kronos//atendimento'"> Atendimento </a>
+      <a mat-list-item (click)="sidenav.toggle()" [routerLink]="'/kronos//relatorio'"> Rel&aacute;torios </a>
+      <a mat-list-item (click)="sidenav.toggle()" [routerLink]="'/kronos//configuracao'"> Configura&ccedil;&atilde;o
+      </a>
+      <a mat-list-item (click)="sidenav.toggle()" href="" mat-list-item>Close</a>
+
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div style="height: 88vh;">
+      <router-outlet></router-outlet>
+    </div>
+   
+  </mat-sidenav-content>
+</mat-sidenav-container>
+<div class="main">
+    <div class="left">
+        <a href="https://github.com/gabrielbo1/kronos" target="_blank">
+          <img src="https://img.icons8.com/windows/48/000000/github.png">
+        </a>
+   
+        <a href="https://www.linkedin.com/in/gabrielbo1" target="_blank">
+          <img src="https://img.icons8.com/color/48/000000/linkedin.png">
+        </a>
+    </div>
+</div>
