@@ -42,6 +42,11 @@ func PostLoginUsuario(w http.ResponseWriter, r *http.Request) {
 	respostaJSON(w, http.StatusBadRequest, e)
 }
 
+// GetUsuarioOk - GET Confir token e login.
+func GetUsuarioOk(w http.ResponseWriter, r *http.Request) {
+	respostaJSON(w, http.StatusOK, respostaPadraoSimples{Mensagem: "OK"})
+}
+
 func onParserUsuario(w http.ResponseWriter, body []byte, entidade dominio.Usuario,
 	parseFunc func(w http.ResponseWriter, body []byte, entidade interface{}) *dominio.Erro,
 	service func(entidade2 *dominio.Usuario) *dominio.Erro) {

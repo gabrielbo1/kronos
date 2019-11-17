@@ -96,4 +96,10 @@ var rotas = Routes{
 		Pattern:     "/usuario/login",
 		HandlerFunc: PostLoginUsuario,
 	},
+	Route{
+		Name:        "GetUsuarioOk",
+		Method:      "GET",
+		Pattern:     "/usuario/loginok",
+		HandlerFunc: GetUsuarioOk,
+	},
 }
