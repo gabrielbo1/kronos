@@ -82,7 +82,10 @@ export class HttpService<T> {
             }
 
             if (error.status === 401 || error.status == 403) {
-                erroFunc(null);
+                const erroAutorizacao : Erro = new Erro();
+                erroAutorizacao.codigo = 'ERRO';
+                erroAutorizacao.mensagem = 'Erro requisição não autorizada.';
+                erroFunc(erroAutorizacao);
             }
 
             // Tratamento de exceções de négocio.

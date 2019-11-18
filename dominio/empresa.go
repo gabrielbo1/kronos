@@ -12,6 +12,8 @@ func NewEmpresa(empresa *Empresa) *Erro {
 	if empresa.Nome == "" {
 		return &Erro{Codigo: "EMPRESA10", Mensagem: "Erro ao criar nova empresa campo nome obrigatório", Err: nil}
 	}
-	empresa.Ativa = true
+	if empresa.ID == 0 {
+		empresa.Ativa = true
+	}
 	return nil
 }

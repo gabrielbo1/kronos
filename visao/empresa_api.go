@@ -24,9 +24,9 @@ func DeleteEmpresa(w http.ResponseWriter, r *http.Request) {
 	var errDominio *dominio.Erro
 	var paramInt map[string]int
 
-	if paramInt, errDominio = findURLParamInt(r, []string{"id", "Id atendimento nao passao, erro ao deletar atendimento."}); errDominio == nil {
+	if paramInt, errDominio = findURLParamInt(r, []string{"id", "Id atendimento nao passao, erro ao deletar empresa."}); errDominio == nil {
 		if errDominio = aplicacao.ApagarEmpresa(&dominio.Empresa{ID: paramInt["id"]}); errDominio == nil {
-			respostaJSON(w, http.StatusOK, respostaPadraoSimples{Mensagem: "Empresa apagado com sucesso!"})
+			respostaJSON(w, http.StatusOK, respostaPadraoSimples{Mensagem: "Empresa apagada com sucesso!"})
 			return
 		}
 	}

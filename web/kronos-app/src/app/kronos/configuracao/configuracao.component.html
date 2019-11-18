@@ -1,1 +1,64 @@
-<p>configuracao works!</p>
+<div fxLayout="row" fxFlex="container" fxLayout.xs="column" fxLayoutAlign="center">
+    <mat-card fxFlex="100%">
+        <mat-card-header fxLayoutAlign="center">
+            <mat-card-title>
+                <h3 class="mat-1">
+                    Epresas
+                    <mat-icon aria-hidden="false" color="primary">account_balance</mat-icon>
+                </h3>
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-form-field style="max-width:50px; margin-left: 5px;" [style.font-size.px]="'20'">
+                <input matInput [(ngModel)]="empresa.id" disabled="true" placeholder="ID">
+            </mat-form-field>
+            <mat-form-field style="margin-left: 5px;" [style.font-size.px]="'20'">
+                <input matInput [(ngModel)]="empresa.nome" placeholder="Nome empresa">
+            </mat-form-field>
+            <mat-checkbox style="margin-left: 5px;" [(ngModel)]="empresa.ativa" [style.font-size.px]="'20'">Ativa
+            </mat-checkbox>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-icon-button color="primary" (click)="cadastro(empresa)">
+                <mat-icon>save</mat-icon>
+            </button>
+            <button mat-icon-button color="primary" (click)="atualizar(empresa)">
+                <mat-icon>refresh</mat-icon>
+            </button>
+            <button mat-icon-button color="secondary" (click)="limpar(empresa)">
+                    <mat-icon>clear_all</mat-icon>
+                </button>
+            <button mat-icon-button color="warn" (click)="delete(empresa)">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>
+
+<div fxLayout="row" fxFlex="container" fxLayout.xs="column" fxLayoutAlign="center">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+        <!-- Position Column -->
+        <ng-container matColumnDef="ID">
+            <th mat-header-cell *matHeaderCellDef> ID </th>
+            <td mat-cell *matCellDef="let element" (click)="selectionar(element)"> {{element.id}} </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="Nome">
+            <th mat-header-cell *matHeaderCellDef> Nome </th>
+            <td mat-cell *matCellDef="let element"> {{element.nome}} </td>
+        </ng-container>
+
+        <!-- Weight Column -->
+        <ng-container matColumnDef="Ativa">
+            <th mat-header-cell *matHeaderCellDef> Ativa/Desativada </th>
+            <td mat-cell *matCellDef="let element">
+                <p *ngIf="element.ativa">Ativa</p>
+                <p *ngIf="element.ativa == false">Desativada</p>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+</div>

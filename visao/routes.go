@@ -27,7 +27,7 @@ var rotas = Routes{
 	Route{
 		Name:        "DeleteAtendimento",
 		Method:      "DELETE",
-		Pattern:     "/atendimento",
+		Pattern:     "/atendimento/{id}",
 		HandlerFunc: DeleteAtendimento,
 	},
 	Route{
@@ -45,7 +45,7 @@ var rotas = Routes{
 	Route{
 		Name:        "DeleteEmpresa",
 		Method:      "DELETE",
-		Pattern:     "/empresa",
+		Pattern:     "/empresa/{id}",
 		HandlerFunc: DeleteEmpresa,
 	},
 	Route{
@@ -69,7 +69,7 @@ var rotas = Routes{
 	Route{
 		Name:        "DeletePonto",
 		Method:      "DELETE",
-		Pattern:     "/ponto",
+		Pattern:     "/ponto/{id}",
 		HandlerFunc: DeletePonto,
 	},
 	Route{
