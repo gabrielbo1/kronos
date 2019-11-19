@@ -1,3 +1,5 @@
+import { Usuario } from './usuario';
+
 export class DnsWebService {
 
     // Endereco de onde se encontra o servidor na Web - https://www.zaynapp.tk
@@ -9,6 +11,8 @@ export class DnsWebService {
 
     // Constante para identifica tokens de seguranca da aplicacao.
     public static storageTokenAplicacao = '';
+
+    public static usuario : Usuario = null;
 
     public static LOGIN_USUARIO : string = '/usuario/login';
     

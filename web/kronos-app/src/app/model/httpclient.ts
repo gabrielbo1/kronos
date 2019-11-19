@@ -57,7 +57,12 @@ export class HttpService<T> {
 
     public getHeaders(aplicacao: boolean): HttpHeaders {
         let token: string = '';
-        token += aplicacao ? DnsWebService.storageTokenAplicacao : DnsWebService.storageTokenUsuarioAdm;
+        if (DnsWebService.usuario !== null) {
+            token = window.btoa(DnsWebService.usuario.login + ':' + DnsWebService.usuario.senha);
+        }
+        if (aplicacao) {
+            token = DnsWebService.storageTokenAplicacao;
+        }
         let h: HttpHeaders = new HttpHeaders();
         h = h.append('Content-Type', 'application/json');
         h = h.append('Authorization', 'Basic ' + token);

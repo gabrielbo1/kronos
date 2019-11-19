@@ -31,22 +31,7 @@ export class ConfiguracaoComponent implements OnInit, AfterViewInit {
   ngOnInit() { }
 
   ngAfterViewInit() {
-    new HttpService<Array<Empresa>>(this.httpClient)
-      .get(DnsWebService.EMPRESA, false, new Array<Empresa>(), err => {
-        const toast = this.notificationsService.error(err.codigo, err.mensagem, {
-          timeOut: 3000,
-          showProgressBar: true,
-          pauseOnHover: true,
-          clickToClose: true,
-        });
-      })
-      .subscribe(emp => {
-        this.empresas = new Array<Empresa>();
-        emp.forEach((e) => this.empresas.push(e));
-        this.empresas.sort((a, b) => a.id.valueOf() - b.id.valueOf());
-        this.dataSource.data = this.empresas;
-        this.dataSource.data;
-      });
+    this.carregarEmpresas();
   }
 
   selectionar(emp: Empresa) {
@@ -72,23 +57,7 @@ export class ConfiguracaoComponent implements OnInit, AfterViewInit {
       .subscribe(emp => {
         if (emp !== undefined && emp.id !== 0) {
           this.empresa = new Empresa();
-
-          new HttpService<Array<Empresa>>(this.httpClient)
-            .get(DnsWebService.EMPRESA, false, this.empresas, err => {
-              const toast = this.notificationsService.error(err.codigo, err.mensagem, {
-                timeOut: 3000,
-                showProgressBar: true,
-                pauseOnHover: true,
-                clickToClose: true,
-              });
-            })
-            .subscribe(emp => {
-              this.empresas = new Array<Empresa>();
-              emp.forEach((e) => this.empresas.push(e));
-              this.empresas.sort((a, b) => a.id.valueOf() - b.id.valueOf());
-              this.dataSource.data = this.empresas;
-              this.dataSource.data;
-            });
+          this.carregarEmpresas();
         }
       });
   }
@@ -106,23 +75,7 @@ export class ConfiguracaoComponent implements OnInit, AfterViewInit {
       .subscribe(emp => {
         if (emp !== undefined && emp.id !== 0) {
           this.empresa = new Empresa();
-
-          new HttpService<Array<Empresa>>(this.httpClient)
-            .get(DnsWebService.EMPRESA, false, this.empresas, err => {
-              const toast = this.notificationsService.error(err.codigo, err.mensagem, {
-                timeOut: 3000,
-                showProgressBar: true,
-                pauseOnHover: true,
-                clickToClose: true,
-              });
-            })
-            .subscribe(emp => {
-              this.empresas = new Array<Empresa>();
-              emp.forEach((e) => this.empresas.push(e));
-              this.empresas.sort((a, b) => a.id.valueOf() - b.id.valueOf());
-              this.dataSource.data = this.empresas;
-              this.dataSource.data;
-            });
+          this.carregarEmpresas();
         }
       });
   }
@@ -144,22 +97,26 @@ export class ConfiguracaoComponent implements OnInit, AfterViewInit {
           pauseOnHover: true,
           clickToClose: true,
         });
-        new HttpService<Array<Empresa>>(this.httpClient)
-            .get(DnsWebService.EMPRESA, false, this.empresas, err => {
-              const toast = this.notificationsService.error(err.codigo, err.mensagem, {
-                timeOut: 3000,
-                showProgressBar: true,
-                pauseOnHover: true,
-                clickToClose: true,
-              });
-            })
-            .subscribe(emp => {
-              this.empresas = new Array<Empresa>();
-              emp.forEach((e) => this.empresas.push(e));
-              this.empresas.sort((a, b) => a.id.valueOf() - b.id.valueOf());
-              this.dataSource.data = this.empresas;
-              this.dataSource.data;
-            });
+         this.carregarEmpresas();
       });
+  }
+
+  public carregarEmpresas() : void  {
+    new HttpService<Array<Empresa>>(this.httpClient)
+    .get(DnsWebService.EMPRESA, false, this.empresas, err => {
+      const toast = this.notificationsService.error(err.codigo, err.mensagem, {
+        timeOut: 3000,
+        showProgressBar: true,
+        pauseOnHover: true,
+        clickToClose: true,
+      });
+    })
+    .subscribe(emp => {
+      this.empresas = new Array<Empresa>();
+      emp.forEach((e) => this.empresas.push(e));
+      this.empresas.sort((a, b) => a.id.valueOf() - b.id.valueOf());
+      this.dataSource.data = this.empresas;
+      this.dataSource.data;
+    });
   }
 }

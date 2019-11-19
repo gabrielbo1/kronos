@@ -39,7 +39,7 @@ export class LoginComponent implements OnInit {
     })
     .subscribe(usuario => {
       let m : Mensagem = new Mensagem();
-      DnsWebService.storageTokenUsuarioAdm = window.btoa(usuario.login + ':' + usuario.senha);
+      DnsWebService.usuario = usuario;
       new HttpService<Mensagem>(this.httpClient)
         .get(DnsWebService.LOGIN_USUARIOOK, false, m, e => {
           const toast = this.notificationsService.error('LOGIN', 'Login ou senha incorretos', {

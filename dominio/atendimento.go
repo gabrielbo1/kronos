@@ -29,12 +29,12 @@ type Intervalo struct {
 // para atender os casos de atendimentos que prescisam de algum retorno
 // por parte do cliente.
 type Atendimento struct {
-	ID                  int     `json:"id"`
-	Usuario             Usuario `json:"usuario"`
-	Cliente             Empresa `json:"cliente"`
-	HorariosAtendimento []Intervalo
-	StatusAtendimento   StatusAtendimento `json:"StatusAtendimento"`
-	Observacao          string            `json:string`
+	ID                  int               `json:"id"`
+	Usuario             Usuario           `json:"usuario"`
+	Cliente             Empresa           `json:"cliente"`
+	HorariosAtendimento []Intervalo       `json:"horariosAtendimento"`
+	StatusAtendimento   StatusAtendimento `json:"statusAtendimento"`
+	Observacao          string            `json:"observacao"`
 }
 
 // NewAtendimento - Cria novo atendimento valido.
