@@ -52,3 +52,15 @@ func ApagarAtendimento(atendimento *dominio.Atendimento) (errDominio *dominio.Er
 
 	return errDominio
 }
+
+// BuscarAtendimentoIdUsuario - Busca todos atendimentos associados ao usuario.
+func BuscarAtendimentoIdUsuario(idUsuario int) (atendimentos []dominio.Atendimento, errDominio *dominio.Erro) {
+	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
+		atendimentos, errDominio = repAtendimento.FindByIdUsuario(tx, idUsuario)
+		return nil
+	}); errTX != nil {
+		return atendimentos, TrataErroConexao(errDominio, errTX)
+	}
+
+	return atendimentos, errDominio
+}

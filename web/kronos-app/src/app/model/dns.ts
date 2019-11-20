@@ -19,4 +19,8 @@ export class DnsWebService {
     public static LOGIN_USUARIOOK : string = '/usuario/loginok';
 
     public static EMPRESA : string = '/empresa';
+
+    public static ATENDIMENTO : string = '/atendimento';
+
+    public static ATENDIMENTO_USUARIO : string = '/atendimento/usuario';
 }

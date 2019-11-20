@@ -21,3 +21,7 @@ $custom-typography: mat-typography-config($font-family: '"Economica", sans-serif
 
 // Override typography for all Angular Material, including mat-base-typography and all components.
 @include angular-material-typography($custom-typography);
+
+.warn-color {
+  color: #f44336;
+}

@@ -2,6 +2,7 @@ package dominio
 
 import (
 	"github.com/jinzhu/now"
+	"time"
 )
 
 // StatusAtendimento - Controla a situacao do Atendimento
@@ -52,14 +53,18 @@ func NewAtendimento(atnd *Atendimento) *Erro {
 	}
 
 	for i := range atnd.HorariosAtendimento {
-		if _, err := now.Parse(atnd.HorariosAtendimento[i].DataInicio); err != nil {
+		dtInicio, err := now.Parse(atnd.HorariosAtendimento[i].DataInicio)
+		if err != nil {
 			return &Erro{Codigo: "ATENDIMENTO40", Mensagem: "Erro ao validar data de incio."}
 		}
+		atnd.HorariosAtendimento[i].DataInicio = dtInicio.Format(time.RFC822)
 
 		if atnd.HorariosAtendimento[i].DataFim != "" {
-			if _, err := now.Parse(atnd.HorariosAtendimento[i].DataFim); err != nil {
-				return &Erro{Codigo: "ATENDIMENTO50", Mensagem: "Erro ao validar data de fim."}
+			dtFim, err := now.Parse(atnd.HorariosAtendimento[i].DataFim)
+			if err != nil || !dtInicio.Before(dtFim) {
+				return &Erro{Codigo: "ATENDIMENTO50", Mensagem: "Erro ao validar data de fim, ou data fim antes da data início."}
 			}
+			atnd.HorariosAtendimento[i].DataFim = dtFim.Format(time.RFC822)
 		}
 
 		if atnd.StatusAtendimento == Fechado && atnd.HorariosAtendimento[i].DataFim == "" {

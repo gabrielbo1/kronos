@@ -25,6 +25,12 @@ var rotas = Routes{
 		HandlerFunc: PutAtendimento,
 	},
 	Route{
+		Name:        "GetAtendimento",
+		Method:      "GET",
+		Pattern:     "/atendimento/usuario/{id}",
+		HandlerFunc: GetAtendimento,
+	},
+	Route{
 		Name:        "DeleteAtendimento",
 		Method:      "DELETE",
 		Pattern:     "/atendimento/{id}",

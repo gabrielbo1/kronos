@@ -2,42 +2,56 @@
     <mat-card fxFlex="100%">
         <mat-card-header fxLayoutAlign="center">
             <mat-card-title>
-                <h3 class="mat-1">
+                <h4 class="display-1">
                     Atendimento / Chamados
                     <mat-icon aria-hidden="false" color="primary">person</mat-icon>
-                </h3>
+                </h4>
+                <div *ngIf="msgError !== ''" (click)="limarMsgError()">
+                    <span [style.font-size.px]="'15'" class="display-4 warn-color">{{msgError}}</span>
+                </div>
             </mat-card-title>
         </mat-card-header>
 
 
         <mat-card-content style="flex-direction: row;">
             <div style="flex-direction: column;">
-                <mat-form-field style="max-width:50px; margin-left: 5px;" [style.font-size.px]="'20'">
+                <mat-form-field style="max-width:50px; margin-left: 5px;" [style.font-size.px]="'15'">
                     <input matInput [(ngModel)]="atendimento.id" disabled="true" placeholder="ID">
                 </mat-form-field>
             </div>
 
             <div style="flex-direction: column;">
-                <mat-form-field [style.font-size.px]="'20'">
-                    <input matInput [matDatepicker]="dataInicioPicker" placeholder="In&iacute;cio"
-                        [formControl]="dataInicio">
+                <mat-form-field [style.font-size.px]="'15'">
+                    <input matInput 
+                           #dataInicioValor
+                           [matDatepicker]="dataInicioPicker" 
+                           (dateInput)="onChangeDataInicio(dataInicioValor)"
+                           placeholder="In&iacute;cio">
                     <mat-datepicker-toggle matSuffix [for]="dataInicioPicker"></mat-datepicker-toggle>
                     <mat-datepicker touchUi #dataInicioPicker></mat-datepicker>
                 </mat-form-field>
-                <mat-form-field style="margin-left: 10px; margin-right: 5px; width:80px;" [style.font-size.px]="'20'">
-                    <input matInput [(ngModel)]="horaInicio" type="time" placeholder="Hora In&iacute;cio">
+
+                <mat-form-field style="margin-left: 10px; margin-right: 5px; width:80px;" [style.font-size.px]="'15'">
+                    <input matInput [(ngModel)]="horaInicio" id="horaInicioId" name="horaInicio" min="00:00" max="23:59"
+                        type="time" placeholder="Hora In&iacute;cio">
                 </mat-form-field>
 
-                <mat-form-field [style.font-size.px]="'20'">
-                    <input matInput style="margin-left: 10px;" [matDatepicker]="dataFimPicker" placeholder="Fim"
-                        [formControl]="dataFim">
+                <mat-form-field [style.font-size.px]="'15'">
+                    <input matInput 
+                            #dataFimValor 
+                            style="margin-left: 10px;" 
+                            [matDatepicker]="dataFimPicker" 
+                            (dateInput)="onChangeDataFim(dataFimValor)"
+                            placeholder="Fim">
                     <mat-datepicker-toggle matSuffix [for]="dataFimPicker"></mat-datepicker-toggle>
                     <mat-datepicker touchUi #dataFimPicker></mat-datepicker>
                 </mat-form-field>
-                <mat-form-field style="margin-left: 10px; width:80px;" [style.font-size.px]="'20'">
-                    <input matInput [(ngModel)]="horaFim" type="time" placeholder="Hora Fim">
+
+                <mat-form-field style="margin-left: 10px; width:80px;" [style.font-size.px]="'15'">
+                    <input matInput [(ngModel)]="horaFim" name="horaFim" type="time" placeholder="Hora Fim">
                 </mat-form-field>
-                <mat-form-field style="margin-left: 10px; width:150px;" [style.font-size.px]="'20'">
+
+                <mat-form-field style="margin-left: 10px; width:150px;" [style.font-size.px]="'15'">
                     <mat-label>Cliente</mat-label>
                     <mat-select [(ngModel)]="atendimento.cliente" name="cliente">
                         <mat-option *ngFor="let cliente of clientsSelects" [value]="cliente.value">
@@ -45,7 +59,7 @@
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
-                <mat-form-field style="margin-left: 10px; width:150px;" [style.font-size.px]="'20'">
+                <mat-form-field style="margin-left: 10px; width:150px;" [style.font-size.px]="'15'">
                     <mat-label>Status</mat-label>
                     <mat-select [(ngModel)]="atendimento.statusAtendimento" name="cliente">
                         <mat-option *ngFor="let status of statusSelects" [value]="status.value">
@@ -55,11 +69,25 @@
                 </mat-form-field>
             </div>
             <div style="flex-direction: column;">
-                <mat-form-field style="width: 100%;" [style.font-size.px]="'20'">
+                <mat-form-field style="width: 100%;" [style.font-size.px]="'15'">
                     <textarea matInput [(ngModel)]="atendimento.observacao" type="text"
                         placeholder="Observa&ccedil;&otilde;es"></textarea>
                 </mat-form-field>
             </div>
         </mat-card-content>
+        <mat-card-actions>
+            <button mat-icon-button color="primary" (click)="cadastro(atendimento)">
+                <mat-icon>save</mat-icon>
+            </button>
+            <button mat-icon-button color="primary">
+                <mat-icon>refresh</mat-icon>
+            </button>
+            <button mat-icon-button color="secondary">
+                <mat-icon>clear_all</mat-icon>
+            </button>
+            <button mat-icon-button color="warn">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </mat-card-actions>
     </mat-card>
 </div>

@@ -24,9 +24,23 @@ func DeleteAtendimento(w http.ResponseWriter, r *http.Request) {
 	var errDominio *dominio.Erro
 	var paramInt map[string]int
 
-	if paramInt, errDominio = findURLParamInt(r, []string{"id", "Id atendimento nao passao, erro ao deletar atendimento."}); errDominio == nil {
+	if paramInt, errDominio = findURLParamInt(r, []string{"id", "Id atendimento não foi passado, erro ao deletar atendimento."}); errDominio == nil {
 		if errDominio = aplicacao.ApagarAtendimento(&dominio.Atendimento{ID: paramInt["id"]}); errDominio == nil {
 			respostaJSON(w, http.StatusOK, respostaPadraoSimples{Mensagem: "Atendimento apagado com sucesso!"})
+			return
+		}
+	}
+	respostaJSON(w, http.StatusBadRequest, errDominio)
+}
+
+// GetAtendimento - GET Atendimentos
+func GetAtendimento(w http.ResponseWriter, r *http.Request) {
+	var errDominio *dominio.Erro
+	var paramInt map[string]int
+
+	if paramInt, errDominio = findURLParamInt(r, []string{"id", "Id usuário não foi passado, erro ao deletar atendimento."}); errDominio == nil {
+		if atendimentos, errDominio := aplicacao.BuscarAtendimentoIdUsuario(paramInt["id"]); errDominio == nil {
+			respostaJSON(w, http.StatusOK, atendimentos)
 			return
 		}
 	}

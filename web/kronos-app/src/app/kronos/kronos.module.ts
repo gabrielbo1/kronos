@@ -9,6 +9,7 @@ import { KronosRoutingModule } from './kronos-routing.module';
 import { MaterialModule } from '../material-module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SimpleNotificationsModule } from 'angular2-notifications';
+import { MaterialTimePickerModule } from '@candidosales/material-time-picker';
 
 
 import {
@@ -36,6 +37,7 @@ import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/
     SimpleNotificationsModule.forRoot({
       position: ["top", "right"],
     }),
+    MaterialTimePickerModule,
   ],
   providers: [
     {provide: MAT_DATE_LOCALE, useValue: 'pt-BR'},
@@ -43,9 +45,8 @@ import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/
       provide: DateAdapter,
       useClass: MomentDateAdapter,
       deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-      useValue: {useUtc: true}
     },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
+    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS,},
   ]
 })
 export class KronosModule { }

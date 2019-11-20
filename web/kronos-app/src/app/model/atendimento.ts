@@ -16,7 +16,7 @@ export class Atendimento {
     public id : Number;
     public usuario : Usuario;
     public cliente : Empresa;
-    public horariosAtendimento: Array<Intervalo> = new Array<Intervalo>();
+    public horariosAtendimento: Array<Intervalo>;
     public statusAtendimento : StatusAtendimento;
     public observacao : string;
 }

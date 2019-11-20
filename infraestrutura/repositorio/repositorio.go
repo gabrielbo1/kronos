@@ -234,6 +234,8 @@ type AtendimentoRepositorio interface {
 	Update(tx *sql.Tx, entidade dominio.Atendimento) *dominio.Erro
 
 	Delete(tx *sql.Tx, entidade dominio.Atendimento) *dominio.Erro
+
+	FindByIdUsuario(tx *sql.Tx, id int) (entidades []dominio.Atendimento, erro *dominio.Erro)
 }
 
 // NewRepositorioAtendimento -  Retorna repositorio de atendimento
