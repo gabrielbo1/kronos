@@ -117,3 +117,12 @@ modules.xml
 .idea/sonarlint
 
 # End of https://www.gitignore.io/api/go,code,intellij+all
+
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
