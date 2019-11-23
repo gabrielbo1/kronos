@@ -22,11 +22,8 @@
 
             <div style="flex-direction: column;">
                 <mat-form-field [style.font-size.px]="'15'">
-                    <input matInput 
-                           #dataInicioValor
-                           [matDatepicker]="dataInicioPicker" 
-                           (dateInput)="onChangeDataInicio(dataInicioValor)"
-                           placeholder="In&iacute;cio">
+                    <input matInput #dataInicioValor [matDatepicker]="dataInicioPicker"
+                        (dateInput)="onChangeDataInicio(dataInicioValor)" placeholder="In&iacute;cio">
                     <mat-datepicker-toggle matSuffix [for]="dataInicioPicker"></mat-datepicker-toggle>
                     <mat-datepicker touchUi #dataInicioPicker></mat-datepicker>
                 </mat-form-field>
@@ -37,12 +34,8 @@
                 </mat-form-field>
 
                 <mat-form-field [style.font-size.px]="'15'">
-                    <input matInput 
-                            #dataFimValor 
-                            style="margin-left: 10px;" 
-                            [matDatepicker]="dataFimPicker" 
-                            (dateInput)="onChangeDataFim(dataFimValor)"
-                            placeholder="Fim">
+                    <input matInput #dataFimValor style="margin-left: 10px;" [matDatepicker]="dataFimPicker"
+                        (dateInput)="onChangeDataFim(dataFimValor)" placeholder="Fim">
                     <mat-datepicker-toggle matSuffix [for]="dataFimPicker"></mat-datepicker-toggle>
                     <mat-datepicker touchUi #dataFimPicker></mat-datepicker>
                 </mat-form-field>
@@ -76,13 +69,13 @@
             </div>
         </mat-card-content>
         <mat-card-actions>
-            <button mat-icon-button color="primary" (click)="cadastro(atendimento)">
+            <button mat-icon-button color="primary"  (click)="cadastro(atendimento)">
                 <mat-icon>save</mat-icon>
             </button>
             <button mat-icon-button color="primary">
                 <mat-icon>refresh</mat-icon>
             </button>
-            <button mat-icon-button color="secondary">
+            <button mat-icon-button color="secondary" (click)="limpar()">
                 <mat-icon>clear_all</mat-icon>
             </button>
             <button mat-icon-button color="warn">
@@ -90,4 +83,54 @@
             </button>
         </mat-card-actions>
     </mat-card>
+
+
+    <mat-form-field class="search-input">
+        <input matInput [(ngModel)]="textoPesquisa" id="textoPesquisa"  (ngModelChange)="onChangePesquisar()">
+        <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+</div>
+
+
+
+<div style="margin-top: 20px;" fxLayout="row" fxFlex="container" fxLayout.xs="column" fxLayoutAlign="center">
+
+
+
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+        <!-- Position Column -->
+        <ng-container matColumnDef="ID">
+            <th mat-header-cell *matHeaderCellDef> ID </th>
+            <td mat-cell *matCellDef="let element" (click)="selecionar(element)"> {{element.id}} </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="Usuario">
+            <th mat-header-cell *matHeaderCellDef> Usuário </th>
+            <td mat-cell *matCellDef="let element"> {{element.usuario.nome}} </td>
+        </ng-container>
+
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="Cliente">
+            <th mat-header-cell *matHeaderCellDef> Cliente </th>
+            <td mat-cell *matCellDef="let element"> {{element.cliente.nome}} </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="Status">
+            <th mat-header-cell *matHeaderCellDef> Status </th>
+            <td mat-cell *matCellDef="let element"> {{statusName(element.statusAtendimento)}} </td>
+        </ng-container>
+
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+
+
+    <mat-paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions"
+        (page)="onChangePageEvent($event)">
+    </mat-paginator>
 </div>

@@ -31,6 +31,18 @@ var rotas = Routes{
 		HandlerFunc: GetAtendimento,
 	},
 	Route{
+		Name:        "GetAtendimentoPaginado",
+		Method:      "GET",
+		Pattern:     "/atendimento/usuario/{id}/{numPag}/{qtdPag}",
+		HandlerFunc: GetAtendimentoPaginado,
+	},
+	Route{
+		Name:        "GetAtendimentoPaginadoLike",
+		Method:      "GET",
+		Pattern:     "/atendimento/usuario/{id}/{numPag}/{qtdPag}/{like}",
+		HandlerFunc: GetAtendimentoPaginadoLike,
+	},
+	Route{
 		Name:        "DeleteAtendimento",
 		Method:      "DELETE",
 		Pattern:     "/atendimento/{id}",

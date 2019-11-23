@@ -17,7 +17,7 @@ func CadastrarAtendimento(atendimento *dominio.Atendimento) (errDominio *dominio
 
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		atendimento.ID, errDominio = repAtendimento.Save(tx, *atendimento)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -33,7 +33,7 @@ func AtualizarAtendimento(atendimento *dominio.Atendimento) (errDominio *dominio
 
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		errDominio = repAtendimento.Update(tx, *atendimento)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -45,7 +45,7 @@ func AtualizarAtendimento(atendimento *dominio.Atendimento) (errDominio *dominio
 func ApagarAtendimento(atendimento *dominio.Atendimento) (errDominio *dominio.Erro) {
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		errDominio = repAtendimento.Delete(tx, *atendimento)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -63,4 +63,26 @@ func BuscarAtendimentoIdUsuario(idUsuario int) (atendimentos []dominio.Atendimen
 	}
 
 	return atendimentos, errDominio
+}
+
+// BuscarAtendimentoIdUsuarioPaginado - Busca paginada de todos atendimentos de um usuario.
+func BuscarAtendimentoIdUsuarioPaginado(idUsuario int, paginaSolicitada dominio.Pagina) (pagina dominio.Pagina, errDominio *dominio.Erro) {
+	if errTx := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
+		pagina, errDominio = repAtendimento.FindByIdUsuarioPaginado(tx, idUsuario, paginaSolicitada)
+		return dominio.OnError(errDominio)
+	}); errTx != nil {
+		return pagina, TrataErroConexao(errDominio, errTx)
+	}
+	return pagina, errDominio
+}
+
+// BuscarAtendimentoIdUsuarioLikePaginado - Busca paginada com like de todos atendimentos de um usuario.
+func BuscarAtendimentoIdUsuarioLikePaginado(idUsuario int, like string, paginaSolicitada dominio.Pagina) (pagina dominio.Pagina, errDominio *dominio.Erro) {
+	if errTx := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
+		pagina, errDominio = repAtendimento.FindByIdUsuarioPaginadoLike(tx, idUsuario, like, paginaSolicitada)
+		return dominio.OnError(errDominio)
+	}); errTx != nil {
+		return pagina, TrataErroConexao(errDominio, errTx)
+	}
+	return pagina, errDominio
 }

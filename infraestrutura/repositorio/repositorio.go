@@ -236,6 +236,10 @@ type AtendimentoRepositorio interface {
 	Delete(tx *sql.Tx, entidade dominio.Atendimento) *dominio.Erro
 
 	FindByIdUsuario(tx *sql.Tx, id int) (entidades []dominio.Atendimento, erro *dominio.Erro)
+
+	FindByIdUsuarioPaginado(tx *sql.Tx, idUsuario int, paginaSolicitada dominio.Pagina) (pagina dominio.Pagina, errDominio *dominio.Erro)
+
+	FindByIdUsuarioPaginadoLike(tx *sql.Tx, idUsuario int, like string, paginaSolicitada dominio.Pagina) (pagina dominio.Pagina, errDominio *dominio.Erro)
 }
 
 // NewRepositorioAtendimento -  Retorna repositorio de atendimento

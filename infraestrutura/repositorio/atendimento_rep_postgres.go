@@ -3,6 +3,7 @@ package repositorio
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 
 	"github.com/gabrielbo1/kronos/dominio"
 )
@@ -65,9 +66,12 @@ func (atendimentoRepPostgres) Delete(tx *sql.Tx, entidade dominio.Atendimento) *
 }
 
 func (atendimentoRepPostgres) FindByIdUsuario(tx *sql.Tx, id int) (entidades []dominio.Atendimento, erro *dominio.Erro) {
-	sqlQuery := `select id, idusuario, idcliente, 
+	sqlQuery := `select atendimento.id, idusuario, u.nome, idcliente, e.nome_empresa, 
        					horarios_atendimento, status_atendimento, observacao 
-						from atendimento where idusuario = $1`
+						from atendimento 
+						inner join usuario u on u.id = idusuario
+						inner join empresa e on e.id =  idcliente
+						where idusuario = $1`
 	stmt, errDomin := prepararStmt(ctx, tx, "atendimentoRepPostgres", "FindByIdUsuario", sqlQuery)
 	if errDomin != nil {
 		return []dominio.Atendimento{}, errDomin
@@ -86,6 +90,148 @@ func (atendimentoRepPostgres) FindByIdUsuario(tx *sql.Tx, id int) (entidades []d
 	return entidades, nil
 }
 
+func (atendimentoRepPostgres) FindByIdUsuarioPaginado(tx *sql.Tx, idUsuario int, paginaSolicitada dominio.Pagina) (pagina dominio.Pagina, errDominio *dominio.Erro) {
+	var totalRegistro int = 0
+	pagina.NumPagina = paginaSolicitada.NumPagina
+	pagina.QtdPorPagina = paginaSolicitada.QtdPorPagina
+
+	sqlCount := `select count(*) 
+				 from atendimento a 
+				 inner join usuario u on u.id = a.idusuario 
+                 inner join empresa e on e.id = a.idcliente 
+				 where a.idusuario = $1`
+
+	stmt, err := tx.PrepareContext(ctx, sqlCount)
+	if err != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado", Err: err}
+	}
+
+	defer stmt.Close()
+	if err = stmt.QueryRowContext(ctx, idUsuario).Scan(&totalRegistro); err != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado", Err: err}
+	}
+	pagina.TotalRegistro = totalRegistro
+	pagina.TotalPagina = dominio.CalcQtdPaginas(pagina.TotalRegistro, pagina.QtdPorPagina)
+
+	sqlBusca := `select a.id, 
+						a.idusuario, 
+						u.nome, 
+						a.idcliente, 
+						e.nome_empresa, 
+       					a.horarios_atendimento, 
+						a.status_atendimento, 
+						a.observacao 
+				 from atendimento a 
+				 inner join usuario u on u.id = a.idusuario 
+                 inner join empresa e on e.id = a.idcliente 
+				 where a.idusuario = $1 
+				 ORDER BY a.id `
+	sqlBusca += geraSqlOfsset(pagina)
+
+	stmtBusca, err := tx.PrepareContext(ctx, sqlBusca)
+	if err != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20",
+			Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado",
+			Err:      err}
+	}
+
+	defer stmtBusca.Close()
+
+	rows, errTx := stmtBusca.QueryContext(ctx, idUsuario)
+	if errTx != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20",
+			Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado",
+			Err:      errTx}
+	}
+
+	pagina.Conteudo, err = parseAtendimentoPostgres(rows)
+	if err != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado", Err: err}
+	}
+	return pagina, nil
+}
+
+func (atendimentoRepPostgres) FindByIdUsuarioPaginadoLike(tx *sql.Tx, idUsuario int, like string, paginaSolicitada dominio.Pagina) (pagina dominio.Pagina, errDominio *dominio.Erro) {
+	var totalRegistro int = 0
+	pagina.NumPagina = paginaSolicitada.NumPagina
+	pagina.QtdPorPagina = paginaSolicitada.QtdPorPagina
+
+	sqlCount := `select count(*) 
+				 from atendimento a 
+				 inner join usuario u on u.id = a.idusuario 
+                 inner join empresa e on e.id = a.idcliente 
+				 where a.idusuario = $1 `
+	sqlCount += " AND (" + likeAtendimento(like) + ") "
+
+	stmt, err := tx.PrepareContext(ctx, sqlCount)
+	if err != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado", Err: err}
+	}
+
+	defer stmt.Close()
+	if err = stmt.QueryRowContext(ctx, idUsuario).Scan(&totalRegistro); err != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado", Err: err}
+	}
+	pagina.TotalRegistro = totalRegistro
+	pagina.TotalPagina = dominio.CalcQtdPaginas(pagina.TotalRegistro, pagina.QtdPorPagina)
+
+	sqlBusca := `select a.id, 
+						a.idusuario, 
+						u.nome, 
+						a.idcliente, 
+						e.nome_empresa, 
+       					a.horarios_atendimento, 
+						a.status_atendimento, 
+						a.observacao 
+				 from atendimento a 
+				 inner join usuario u on u.id = a.idusuario 
+                 inner join empresa e on e.id = a.idcliente 
+				 where a.idusuario = $1 `
+
+	sqlBusca += " AND (" + likeAtendimento(like) + ") "
+	sqlBusca += " ORDER BY a.id "
+
+	sqlBusca += geraSqlOfsset(pagina)
+
+	stmtBusca, err := tx.PrepareContext(ctx, sqlBusca)
+	if err != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20",
+			Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado",
+			Err:      err}
+	}
+
+	defer stmtBusca.Close()
+
+	rows, errTx := stmtBusca.QueryContext(ctx, idUsuario)
+	if errTx != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20",
+			Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado",
+			Err:      errTx}
+	}
+
+	pagina.Conteudo, err = parseAtendimentoPostgres(rows)
+	if err != nil {
+		log.Println(err)
+		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado", Err: err}
+	}
+	return pagina, nil
+}
+
+func likeAtendimento(texto string) string {
+	like := " UPPER(u.nome) LIKE UPPER('%" + texto + "%') OR"
+	like += " UPPER(e.nome_empresa) LIKE UPPER('%" + texto + "%')"
+	return like
+}
+
 func parseAtendimentoPostgres(rows *sql.Rows) ([]dominio.Atendimento, error) {
 	defer rows.Close()
 	var result []dominio.Atendimento
@@ -96,8 +242,14 @@ func parseAtendimentoPostgres(rows *sql.Rows) ([]dominio.Atendimento, error) {
 		atn.HorariosAtendimento = []dominio.Intervalo{}
 		jsonHorariosAtendimento := ""
 
-		if err := rows.Scan(&atn.ID, &atn.Usuario.ID, &atn.Cliente.ID,
-			&jsonHorariosAtendimento, &atn.StatusAtendimento, &atn.Observacao); err != nil {
+		if err := rows.Scan(&atn.ID,
+			&atn.Usuario.ID,
+			&atn.Usuario.Nome,
+			&atn.Cliente.ID,
+			&atn.Cliente.Nome,
+			&jsonHorariosAtendimento,
+			&atn.StatusAtendimento,
+			&atn.Observacao); err != nil {
 			return nil, err
 		}
 

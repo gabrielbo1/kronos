@@ -17,7 +17,7 @@ func CadastrarPonto(ponto *dominio.Ponto) (errDominio *dominio.Erro) {
 
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		ponto.ID, errDominio = repPonto.Save(tx, *ponto)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -32,7 +32,7 @@ func AtualizarPonto(ponto *dominio.Ponto) (errDominio *dominio.Erro) {
 
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		errDominio = repPonto.Update(tx, *ponto)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -43,7 +43,7 @@ func AtualizarPonto(ponto *dominio.Ponto) (errDominio *dominio.Erro) {
 func ApagarPonto(ponto *dominio.Ponto) (errDominio *dominio.Erro) {
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		errDominio = repPonto.Delete(tx, *ponto)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}

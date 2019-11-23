@@ -46,6 +46,10 @@ func ajustarDataPostgres(dataString string) string {
 	return strconv.Itoa(ano) + "-" + strconv.Itoa(int(mes)) + "-" + strconv.Itoa(day)
 }
 
+func geraSqlOfsset(pagina dominio.Pagina) string {
+	return "OFFSET " + strconv.Itoa((pagina.NumPagina)*pagina.QtdPorPagina) + " LIMIT " + strconv.Itoa(pagina.QtdPorPagina)
+}
+
 func delete(tx *sql.Tx, nomeRep, tabela string, id int) *dominio.Erro {
 	sqlDelete := "DELETE FROM " + tabela + " WHERE id=$1"
 	stmt, err := prepararStmt(ctx, tx, nomeRep, "Delete", sqlDelete)

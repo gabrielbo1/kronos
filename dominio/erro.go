@@ -1,6 +1,9 @@
 package dominio
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/pkg/errors"
+)
 
 // Erro - Define formato padrão de retorno de mensagem da aplicação.
 type Erro struct {
@@ -9,7 +12,9 @@ type Erro struct {
 	Err      error  `json:"err"`
 }
 
-// Erro - Serializa erro em string.
-func (e Erro) Erro() string {
-	return fmt.Sprintf("%s - %s", e.Codigo, e.Mensagem)
+func OnError(e *Erro) error {
+	if e == nil {
+		return nil
+	}
+	return errors.New(fmt.Sprintf("%s - %s", e.Codigo, e.Mensagem))
 }

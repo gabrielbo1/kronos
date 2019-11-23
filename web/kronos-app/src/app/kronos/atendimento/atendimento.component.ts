@@ -5,10 +5,13 @@ import * as moment from 'moment';
 import { NotificationsService } from 'angular2-notifications';
 
 import { Atendimento, Intervalo, StatusAtendimento } from 'src/app/model/atendimento';
+import { Pagina } from 'src/app/model/pagina';
 import { Empresa } from 'src/app/model/empresa';
 import { HttpService } from 'src/app/model/httpclient';
 import { DnsWebService } from 'src/app/model/dns';
-
+import { MatTableDataSource } from '@angular/material/table';
+import { SelectionModel } from '@angular/cdk/collections';
+import { PageEvent } from '@angular/material/paginator';
 
 export interface StatusSelect {
   value: StatusAtendimento;
@@ -54,6 +57,19 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
   public atendimentos: Array<Atendimento> = new Array<Atendimento>();
   public msgError: string = '';
 
+  displayedColumns: string[] = ['ID', 'Usuario', 'Cliente', 'Status'];
+  dataSource = new MatTableDataSource(this.atendimentos);
+  selection = new SelectionModel<Atendimento>(true, []);
+
+  // MatPaginator Inputs
+  length = 100;
+  pageSize = 10;
+  pageSizeOptions: number[] = [5, 10, 25, 100];
+  // MatPaginator Output
+  pageEvent: PageEvent;
+
+
+  private atendPagHttpClient: HttpService<Pagina<Atendimento>>;
   private atendHttpClient: HttpService<Atendimento>;
   private atendsHttpClient: HttpService<Array<Atendimento>>;
   private empresasHttpClient: HttpService<Array<Empresa>>;
@@ -83,6 +99,7 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    this.atendPagHttpClient = new HttpService<Pagina<Atendimento>>(this.httpClient);
     this.atendHttpClient = new HttpService<Atendimento>(this.httpClient);
     this.atendsHttpClient = new HttpService<Array<Atendimento>>(this.httpClient);
     this.empresasHttpClient = new HttpService<Array<Empresa>>(this.httpClient);
@@ -93,6 +110,7 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
         this.clientsSelects = [];
         empresas.forEach(emp => this.clientsSelects.push({ value: emp, viewValue: emp.nome }));
       });
+    this.buscarAtendimentosIdUsuario();
   }
 
 
@@ -129,15 +147,20 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
     atnd.usuario = DnsWebService.usuario;
 
     this.atendHttpClient
-      .post(DnsWebService.ATENDIMENTO, atnd, false, this.atendimento, e => {
-        this.onErrorMensage(e.codigo, e.mensagem);
-      })
-      .subscribe(atndReturn => {
-        if (atndReturn.id !== undefined && atndReturn.id !== 0) {
-          this.limpar();
-        }
-        this.buscarAtendimentosIdUsuario();
-      })
+        .post(DnsWebService.ATENDIMENTO, atnd, false, this.atendimento, e => {
+          this.onErrorMensage(e.codigo, e.mensagem);
+        })
+        .subscribe(atndReturn => {
+          if (atndReturn.id !== undefined && atndReturn.id !== 0) {
+            this.limpar();
+            this.buscarAtendimentosIdUsuario();
+            this.onSucessMensage("Sucesso", "Chamado registrado com sucesso!");
+          }
+        });
+  }
+
+  selecionar(atn: Atendimento) {
+    this.atendimento = atn;
   }
 
   limpar() {
@@ -147,18 +170,71 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
     this.horaFim = '00:00';
     this.atendimento = new Atendimento();
     this.atendimento.horariosAtendimento = new Array<Intervalo>();
+    this.atendimento.horariosAtendimento.push(new Intervalo());
   }
 
-  private buscarAtendimentosIdUsuario() {
-    this.atendsHttpClient
-      .get(DnsWebService.ATENDIMENTO_USUARIO + '/' + DnsWebService.usuario.id,
-        false, new Array<Atendimento>(), e1 => {
+  statusName(s: StatusAtendimento): string {
+    return StatusAtendimento[s];
+  }
+
+  onChangePageEvent(p: PageEvent) {
+    this.pageEvent = p;
+    if (this.textoPesquisa !== undefined && this.textoPesquisa !== '') {
+       this.onChangePesquisar();
+       return;
+    }
+    this.buscarAtendimentosIdUsuario();
+  }
+
+  textoPesquisa: string = '';
+  onChangePesquisar() {
+    this.atendPagHttpClient
+      .get(DnsWebService.ATENDIMENTO_USUARIO
+        + '/' + DnsWebService.usuario.id
+        + '/' + this.getNumPag(this.pageEvent)
+        + '/' + this.getPageSize(this.pageEvent)
+        + '/' + this.textoPesquisa,
+        false, new Pagina<Atendimento>(), e1 => {
           this.onErrorMensage(e1.codigo, e1.mensagem);
         })
       .subscribe(atendReturs => {
         this.atendimentos = [];
-        atendReturs.forEach((a) => this.atendimentos.push(a));
-      })
+        atendReturs.conteudo.forEach((a) => this.atendimentos.push(a));
+        this.dataSource.data = this.atendimentos;
+        this.length = atendReturs.totalRegistro.valueOf();
+      });
+  }
+
+ 
+
+  private buscarAtendimentosIdUsuario() {
+    this.atendPagHttpClient
+      .get(DnsWebService.ATENDIMENTO_USUARIO + '/' + DnsWebService.usuario.id
+        + '/' + this.getNumPag(this.pageEvent)
+        + '/' + this.getPageSize(this.pageEvent),
+        false, new Pagina<Atendimento>(), e1 => {
+          this.onErrorMensage(e1.codigo, e1.mensagem);
+        })
+      .subscribe(atendReturs => {
+        this.atendimentos = [];
+        atendReturs.conteudo.forEach((a) => this.atendimentos.push(a));
+        this.dataSource.data = this.atendimentos;
+        this.length = atendReturs.totalRegistro.valueOf();
+      });
+  }
+
+  private getNumPag(event: PageEvent): number {
+    if (event === undefined || event === null) {
+      return 0;
+    }
+    return event.pageIndex;
+  }
+
+  private getPageSize(event: PageEvent): number {
+    if (event === undefined || event === null) {
+      return 10;
+    }
+    return event.pageSize;
   }
 
   private onSucessMensage(title: string, msg: string) {

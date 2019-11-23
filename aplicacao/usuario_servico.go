@@ -31,7 +31,7 @@ func CadastrarUsuario(usuario *dominio.Usuario) (errDominio *dominio.Erro) {
 			}
 		}
 		usuario.ID, errDominio = repUsuario.Save(tx, *usuario)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -58,7 +58,7 @@ func AtualizarUsuario(usuario *dominio.Usuario) (errDominio *dominio.Erro) {
 			}
 		}
 		errDominio = repUsuario.Update(tx, *usuario)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -69,7 +69,7 @@ func AtualizarUsuario(usuario *dominio.Usuario) (errDominio *dominio.Erro) {
 func BuscarUsuarios() (usuarios []dominio.Usuario, errDominio *dominio.Erro) {
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		usuarios, errDominio = repUsuario.FindAll(tx)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return usuarios, TrataErroConexao(errDominio, errTX)
 	}
@@ -83,7 +83,7 @@ func Login(login, senha string) (usuario dominio.Usuario, errDominio *dominio.Er
 			senha = fmt.Sprintf("%x", sha256.Sum256([]byte(senha)))
 		}
 		usuario, errDominio = repUsuario.Login(tx, login, senha)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return usuario, TrataErroConexao(errDominio, errTX)
 	}

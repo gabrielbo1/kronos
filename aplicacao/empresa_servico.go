@@ -17,7 +17,7 @@ func CadastrarEmpresa(empresa *dominio.Empresa) (errDominio *dominio.Erro) {
 
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		empresa.ID, errDominio = repEmpresa.Save(tx, *empresa)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -33,7 +33,7 @@ func AtualizarEmpresa(empresa *dominio.Empresa) (errDominio *dominio.Erro) {
 
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		errDominio = repEmpresa.Update(tx, *empresa)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -45,7 +45,7 @@ func AtualizarEmpresa(empresa *dominio.Empresa) (errDominio *dominio.Erro) {
 func ApagarEmpresa(empresa *dominio.Empresa) (errDominio *dominio.Erro) {
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		errDominio = repEmpresa.Delete(tx, *empresa)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return TrataErroConexao(errDominio, errTX)
 	}
@@ -57,7 +57,7 @@ func ApagarEmpresa(empresa *dominio.Empresa) (errDominio *dominio.Erro) {
 func BuscaEmpresas() (empresas []dominio.Empresa, errDominio *dominio.Erro) {
 	if errTX := repositorio.Transact(repositorio.DB, func(tx *sql.Tx) error {
 		empresas, errDominio = repEmpresa.FindAll(tx)
-		return nil
+		return dominio.OnError(errDominio)
 	}); errTX != nil {
 		return empresas, TrataErroConexao(errDominio, errTX)
 	}
