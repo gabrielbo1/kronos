@@ -36,18 +36,40 @@ func InCreate(ids []int) string {
 }
 
 //ajustarDataPostgres - Ajusta data de acordo com o padrao para Postgresql.
-func ajustarDataPostgres(dataString string) string {
+func ajustarDataPostgres(dataString string) sql.NullTime {
+	if dataString == "" {
+		return sql.NullTime{}
+	}
+
 	var data time.Time
 	var err error
 	if data, err = time.Parse(time.RFC3339, dataString); err != nil {
-		return dataString
+		return sql.NullTime{}
 	}
-	ano, mes, day := data.Date()
-	return strconv.Itoa(ano) + "-" + strconv.Itoa(int(mes)) + "-" + strconv.Itoa(day)
+	return sql.NullTime{
+		Time:  data,
+		Valid: true,
+	}
 }
 
 func geraSqlOfsset(pagina dominio.Pagina) string {
 	return "OFFSET " + strconv.Itoa((pagina.NumPagina)*pagina.QtdPorPagina) + " LIMIT " + strconv.Itoa(pagina.QtdPorPagina)
+}
+
+func deleteNameColumn(tx *sql.Tx, nomeRep, tabela, nameCol string, id int) *dominio.Erro {
+	sqlDelete := "DELETE FROM " + tabela + " WHERE " + nameCol + "=$1"
+	stmt, err := prepararStmt(ctx, tx, nomeRep, "Delete", sqlDelete)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	if ok, errDomain := scanParamStmt("empresaRepPostgres", "Delete", stmt, func(stmt *sql.Stmt) error {
+		_, err := stmt.ExecContext(ctx, id)
+		return err
+	}); !ok {
+		return errDomain
+	}
+	return nil
 }
 
 func delete(tx *sql.Tx, nomeRep, tabela string, id int) *dominio.Erro {

@@ -2,8 +2,8 @@ package repositorio
 
 import (
 	"database/sql"
-	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/gabrielbo1/kronos/dominio"
 )
@@ -12,56 +12,57 @@ import (
 type atendimentoRepPostgres string
 
 func (atendimentoRepPostgres) Save(tx *sql.Tx, entidade dominio.Atendimento) (int, *dominio.Erro) {
-	sqlInsert := `INSERT INTO atendimento(idUsuario, idCliente, horarios_atendimento, status_atendimento, observacao) 
-					VALUES ($1, $2, $3, $4, $5) RETURNING ID`
+	sqlInsert := `INSERT INTO atendimento(idUsuario, idCliente, status_atendimento, observacao) 
+					VALUES ($1, $2, $3, $4) RETURNING ID`
 	stmt, err := prepararStmt(ctx, tx, "atendimentoRepPostgres", "Save", sqlInsert)
 	if err != nil {
 		return 0, err
 	}
 	defer stmt.Close()
-
-	var jsonByte []byte
-	var errJSON error
-	if jsonByte, errJSON = json.Marshal(entidade.HorariosAtendimento); err != nil {
-		return 0, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro atendimentoRepPostgres função Save", Err: errJSON}
-	}
-
 	id := 0
 	if ok, errDomin := scanParamStmt("atendimentoRepPostgres", "Save", stmt, func(stmt *sql.Stmt) error {
-		return stmt.QueryRowContext(ctx, &entidade.Usuario.ID, &entidade.Cliente.ID,
-			string(jsonByte), &entidade.StatusAtendimento, &entidade.Observacao).Scan(&id)
+		return stmt.QueryRowContext(ctx, &entidade.Usuario.ID,
+			&entidade.Cliente.ID,
+			&entidade.StatusAtendimento,
+			&entidade.Observacao).Scan(&id)
 	}); !ok {
 		return 0, errDomin
 	}
+
+	if errDomin := saveIntervalo(tx, id, entidade.HorariosAtendimento); errDomin != nil {
+		return 0, errDomin
+	}
+
 	return id, nil
 }
 
 func (atendimentoRepPostgres) Update(tx *sql.Tx, entidade dominio.Atendimento) *dominio.Erro {
-	sqlUptade := `UPDATE atendimento SET idUsuario=$1, idCliente=$2, horarios_atendimento=$3, status_atendimento=$4, observacao=$5 
-					WHERE id=$6`
+	sqlUptade := `UPDATE atendimento SET idUsuario=$1, idCliente=$2, status_atendimento=$3, observacao=$4 
+					WHERE id=$5`
 	stmt, err := prepararStmt(ctx, tx, "atendimentoRepPostgres", "Update", sqlUptade)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	var jsonByte []byte
-	var errJSON error
-	if jsonByte, errJSON = json.Marshal(entidade.HorariosAtendimento); err != nil {
-		return &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro atendimentoRepPostgres função Save", Err: errJSON}
-	}
-
 	if ok, errDomain := scanParamStmt("atendimentoRepPostgres", "Update", stmt, func(stmt *sql.Stmt) error {
 		_, err := stmt.ExecContext(ctx, entidade.Usuario.ID, &entidade.Cliente.ID,
-			string(jsonByte), &entidade.StatusAtendimento, &entidade.Observacao, &entidade.ID)
+			&entidade.StatusAtendimento, &entidade.Observacao, &entidade.ID)
 		return err
 	}); !ok {
 		return errDomain
+	}
+
+	if errDomin := saveIntervalo(tx, entidade.ID, entidade.HorariosAtendimento); errDomin != nil {
+		return errDomin
 	}
 	return nil
 }
 
 func (atendimentoRepPostgres) Delete(tx *sql.Tx, entidade dominio.Atendimento) *dominio.Erro {
+	if err := deleteNameColumn(tx, "atendimentoRepPostgres", "INTERVALO", "IDATENDIMENTO", entidade.ID); err != nil {
+		return err
+	}
 	return delete(tx, "atendimentoRepPostgres", "atendimento", entidade.ID)
 }
 
@@ -83,7 +84,7 @@ func (atendimentoRepPostgres) FindByIdUsuario(tx *sql.Tx, id int) (entidades []d
 		return []dominio.Atendimento{}, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuario", Err: errTx}
 	}
 
-	entidades, err := parseAtendimentoPostgres(rows)
+	entidades, err := parseAtendimentoPostgres(tx, rows)
 	if err != nil {
 		return []dominio.Atendimento{}, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Login usuarioRepPostgres função Login", Err: err}
 	}
@@ -119,15 +120,14 @@ func (atendimentoRepPostgres) FindByIdUsuarioPaginado(tx *sql.Tx, idUsuario int,
 						a.idusuario, 
 						u.nome, 
 						a.idcliente, 
-						e.nome_empresa, 
-       					a.horarios_atendimento, 
+						e.nome_empresa,
 						a.status_atendimento, 
 						a.observacao 
 				 from atendimento a 
 				 inner join usuario u on u.id = a.idusuario 
                  inner join empresa e on e.id = a.idcliente 
 				 where a.idusuario = $1 
-				 ORDER BY a.id `
+				 ORDER BY a.id DESC `
 	sqlBusca += geraSqlOfsset(pagina)
 
 	stmtBusca, err := tx.PrepareContext(ctx, sqlBusca)
@@ -148,7 +148,7 @@ func (atendimentoRepPostgres) FindByIdUsuarioPaginado(tx *sql.Tx, idUsuario int,
 			Err:      errTx}
 	}
 
-	pagina.Conteudo, err = parseAtendimentoPostgres(rows)
+	pagina.Conteudo, err = parseAtendimentoPostgres(tx, rows)
 	if err != nil {
 		log.Println(err)
 		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado", Err: err}
@@ -186,8 +186,7 @@ func (atendimentoRepPostgres) FindByIdUsuarioPaginadoLike(tx *sql.Tx, idUsuario 
 						a.idusuario, 
 						u.nome, 
 						a.idcliente, 
-						e.nome_empresa, 
-       					a.horarios_atendimento, 
+						e.nome_empresa,
 						a.status_atendimento, 
 						a.observacao 
 				 from atendimento a 
@@ -196,7 +195,7 @@ func (atendimentoRepPostgres) FindByIdUsuarioPaginadoLike(tx *sql.Tx, idUsuario 
 				 where a.idusuario = $1 `
 
 	sqlBusca += " AND (" + likeAtendimento(like) + ") "
-	sqlBusca += " ORDER BY a.id "
+	sqlBusca += " ORDER BY a.id DESC"
 
 	sqlBusca += geraSqlOfsset(pagina)
 
@@ -218,7 +217,7 @@ func (atendimentoRepPostgres) FindByIdUsuarioPaginadoLike(tx *sql.Tx, idUsuario 
 			Err:      errTx}
 	}
 
-	pagina.Conteudo, err = parseAtendimentoPostgres(rows)
+	pagina.Conteudo, err = parseAtendimentoPostgres(tx, rows)
 	if err != nil {
 		log.Println(err)
 		return paginaSolicitada, &dominio.Erro{Codigo: "SQLUTIL_REP20", Mensagem: "Erro Atendimento atendimentoRepPostgres função FindByIdUsuarioPaginado", Err: err}
@@ -232,7 +231,100 @@ func likeAtendimento(texto string) string {
 	return like
 }
 
-func parseAtendimentoPostgres(rows *sql.Rows) ([]dominio.Atendimento, error) {
+func saveIntervalo(tx *sql.Tx, idAtendimento int, intervalos []dominio.Intervalo) *dominio.Erro {
+	var errDomin *dominio.Erro
+	for i := 0; i < len(intervalos) && errDomin == nil; i++ {
+		if intervalos[i].ID == 0 {
+			errDomin = inserIntervalo(tx, idAtendimento, intervalos[i])
+			continue
+		}
+		errDomin = updateIntervalo(tx, intervalos[i])
+	}
+	return errDomin
+}
+
+func inserIntervalo(tx *sql.Tx, idAtendimento int, intervalo dominio.Intervalo) *dominio.Erro {
+	sqlInsert := `INSERT INTO INTERVALO (IDATENDIMENTO, DATA_INICIO, DATA_FIM) VALUES ($1, $2, $3) RETURNING ID `
+	stmt, err := prepararStmt(ctx, tx, "atendimentoRepPostgres", "inserIntervalo", sqlInsert)
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+	if ok, errDomin := scanParamStmt("atendimentoRepPostgres", "saveIntervalo", stmt, func(stmt *sql.Stmt) error {
+		return stmt.QueryRowContext(ctx, &idAtendimento,
+			ajustarDataPostgres(intervalo.DataInicio),
+			ajustarDataPostgres(intervalo.DataFim)).Scan(&intervalo.ID)
+	}); !ok {
+		return errDomin
+	}
+
+	return nil
+}
+
+func updateIntervalo(tx *sql.Tx, intervalo dominio.Intervalo) *dominio.Erro {
+	sqlUpdate := "UPDATE INTERVALO SET DATA_FIM=$1 WHERE ID = $2"
+	stmt, err := prepararStmt(ctx, tx, "atendimentoRepPostgres", "updateIntervalo", sqlUpdate)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	if ok, errDomin := scanParamStmt("atendimentoRepPostgres", "updateIntervalo", stmt, func(stmt *sql.Stmt) error {
+		_, err := stmt.ExecContext(ctx, ajustarDataPostgres(intervalo.DataFim), &intervalo.ID)
+		return err
+	}); !ok {
+		return errDomin
+	}
+	return nil
+}
+
+func findInervalosAtendimento(tx *sql.Tx, idAtendimento int) ([]dominio.Intervalo, error) {
+	sqlSeletIntervalo := `SELECT ID, DATA_INICIO, DATA_FIM FROM INTERVALO WHERE IDATENDIMENTO = $1`
+	stmt, err := prepararStmt(ctx, tx, "atendimentoRepPostgres", "findInervalosAtendimento", sqlSeletIntervalo)
+	if err != nil {
+		return nil, err.Err
+	}
+	defer stmt.Close()
+
+	var rows *sql.Rows
+	var err1 error
+	if ok, errDomin := scanParamStmt("atendimentoRepPostgres", "findInervalosAtendimento", stmt, func(stmt *sql.Stmt) error {
+		if rows, err1 = stmt.QueryContext(ctx, &idAtendimento); err1 != nil {
+			return err1
+		}
+		return nil
+	}); !ok {
+		return nil, errDomin.Err
+	}
+
+	defer rows.Close()
+	var result []dominio.Intervalo
+	for rows.Next() {
+		interv := dominio.Intervalo{}
+		var dtInicio sql.NullTime
+		var dtFim sql.NullTime
+		if err2 := rows.Scan(&interv.ID, &dtInicio, &dtFim); err2 != nil {
+			return nil, err2
+		}
+
+		if dtInicio.Valid {
+			interv.DataInicio = dtInicio.Time.Format(time.RFC3339)
+		}
+
+		if dtFim.Valid {
+			interv.DataFim = dtFim.Time.Format(time.RFC3339)
+		}
+
+		result = append(result, interv)
+	}
+
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+	return result, nil
+}
+
+func parseAtendimentoPostgres(tx *sql.Tx, rows *sql.Rows) ([]dominio.Atendimento, error) {
 	defer rows.Close()
 	var result []dominio.Atendimento
 	for rows.Next() {
@@ -240,24 +332,29 @@ func parseAtendimentoPostgres(rows *sql.Rows) ([]dominio.Atendimento, error) {
 		atn.Usuario = dominio.Usuario{}
 		atn.Cliente = dominio.Empresa{}
 		atn.HorariosAtendimento = []dominio.Intervalo{}
-		jsonHorariosAtendimento := ""
 
 		if err := rows.Scan(&atn.ID,
 			&atn.Usuario.ID,
 			&atn.Usuario.Nome,
 			&atn.Cliente.ID,
 			&atn.Cliente.Nome,
-			&jsonHorariosAtendimento,
 			&atn.StatusAtendimento,
 			&atn.Observacao); err != nil {
 			return nil, err
 		}
-
-		if err := json.Unmarshal([]byte(jsonHorariosAtendimento), &atn.HorariosAtendimento); err != nil {
-			return nil, err
-		}
-
 		result = append(result, atn)
 	}
+
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+
+	for i := range result {
+		var err error
+		if result[i].HorariosAtendimento, err = findInervalosAtendimento(tx, result[i].ID); err != nil {
+			return nil, err
+		}
+	}
+
 	return result, nil
 }

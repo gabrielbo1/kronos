@@ -1,5 +1,7 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormControl } from '@angular/forms';
 
 import * as moment from 'moment';
 import { NotificationsService } from 'angular2-notifications';
@@ -13,6 +15,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { PageEvent } from '@angular/material/paginator';
 
+import { Mensagem } from 'src/app/model/mensagem';
+
 export interface StatusSelect {
   value: StatusAtendimento;
   viewValue: string;
@@ -21,6 +25,12 @@ export interface StatusSelect {
 export interface ClienteSelect {
   value: Empresa,
   viewValue: string;
+  id: Number;
+}
+
+export interface DeletarAtendimento {
+  value: boolean;
+  atendimentoComponent: AtendimentoComponent;
 }
 
 @Component({
@@ -32,14 +42,15 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
 
   @ViewChild('dataInicioValor', { static: false })
   dataInicioValor: any;
+  dataInicioValorForm = new FormControl(new Date());
   public dataInicio: Date = new Date();
   public horaInicio: string = '00:00'
 
   @ViewChild('dataFimValor', { static: false })
   dataFimValor: any;
+  dataFimValorForm = new FormControl(new Date());
   public dataFim: Date = new Date();
   public horaFim: string = '00:00'
-
 
   public statusSelects: StatusSelect[] = [
     {
@@ -56,6 +67,8 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
   public atendimento: Atendimento = new Atendimento();
   public atendimentos: Array<Atendimento> = new Array<Atendimento>();
   public msgError: string = '';
+  public deletarAtendimento: boolean = false;
+  public addIntervalo: boolean = false;
 
   displayedColumns: string[] = ['ID', 'Usuario', 'Cliente', 'Status'];
   dataSource = new MatTableDataSource(this.atendimentos);
@@ -71,24 +84,16 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
 
   private atendPagHttpClient: HttpService<Pagina<Atendimento>>;
   private atendHttpClient: HttpService<Atendimento>;
-  private atendsHttpClient: HttpService<Array<Atendimento>>;
-  private empresasHttpClient: HttpService<Array<Empresa>>;
+  private atendDeltHttpClient: HttpService<Mensagem>;
 
   constructor(
     private httpClient: HttpClient,
-    private notificationsService: NotificationsService) {
+    private notificationsService: NotificationsService,
+    public dialog: MatDialog) {
     moment.locale('pt-BR');
   }
 
-  ngOnInit() {
-    if (this.atendimento.horariosAtendimento === undefined) {
-      this.atendimento.horariosAtendimento = new Array<Intervalo>();
-      this.atendimento.horariosAtendimento.push(new Intervalo());
-      let length: number = this.atendimento.horariosAtendimento.length;
-      this.atendimento.horariosAtendimento[length - 1].dataInicio = new Date().toISOString();
-      this.atendimento.horariosAtendimento[length - 1].dataFim = new Date().toISOString();
-    }
-  }
+  ngOnInit() { }
 
   onChangeDataInicio(s: any) {
     this.dataInicio = moment(s.value, 'DD/MM/YYYY').toDate();
@@ -101,66 +106,104 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.atendPagHttpClient = new HttpService<Pagina<Atendimento>>(this.httpClient);
     this.atendHttpClient = new HttpService<Atendimento>(this.httpClient);
-    this.atendsHttpClient = new HttpService<Array<Atendimento>>(this.httpClient);
-    this.empresasHttpClient = new HttpService<Array<Empresa>>(this.httpClient);
+    this.atendDeltHttpClient = new HttpService<Mensagem>(this.httpClient);
 
-    this.empresasHttpClient
+    new HttpService<Array<Empresa>>(this.httpClient)
       .get(DnsWebService.EMPRESA, false, new Array<Empresa>(), e => { })
       .subscribe(empresas => {
         this.clientsSelects = [];
-        empresas.forEach(emp => this.clientsSelects.push({ value: emp, viewValue: emp.nome }));
+        empresas.forEach(emp => this.clientsSelects.push({ id: emp.id, value: emp, viewValue: emp.nome }));
       });
     this.buscarAtendimentosIdUsuario();
   }
 
 
-  cadastro(atnd: Atendimento) {
-    const length: number = atnd.horariosAtendimento.length;
-
-    if (this.horaInicio === undefined || this.horaInicio === '00:00') {
-      this.onErrorMensage('Erro', 'Informe a hora de início do atendimento.')
-      return;
-    } else {
-      atnd.horariosAtendimento[length - 1].dataInicio
-        = moment(this.dataInicio).format('YYYY-MM-DD') + ' ' + this.horaInicio;
-    }
-
-    if (this.atendimento.statusAtendimento === StatusAtendimento.Fechado &&
-      (this.horaFim === undefined || this.horaFim === '00:00')) {
-      this.onErrorMensage('Erro', 'Informe a hora de fim do atendimento.')
-      return;
-    } else {
-      atnd.horariosAtendimento[length - 1].dataFim
-        = moment(this.dataFim).format('YYYY-MM-DD') + ' ' + this.horaFim;
-    }
-
-    if (atnd.cliente === undefined) {
-      this.onErrorMensage('Erro', 'Informe o cliente do atendimento.')
-      return;
-    }
-
-    if (atnd.statusAtendimento === undefined) {
-      this.onErrorMensage('Erro', 'Informe o status do atendimento.')
-      return;
-    }
-
-    atnd.usuario = DnsWebService.usuario;
-
-    this.atendHttpClient
-        .post(DnsWebService.ATENDIMENTO, atnd, false, this.atendimento, e => {
+  cadastro() {
+    if (this.validaAtendimento(this.atendimento)) {
+      this.atendHttpClient
+        .post(DnsWebService.ATENDIMENTO, this.atendimento, false, new Atendimento(), e => {
           this.onErrorMensage(e.codigo, e.mensagem);
         })
         .subscribe(atndReturn => {
           if (atndReturn.id !== undefined && atndReturn.id !== 0) {
             this.limpar();
-            this.buscarAtendimentosIdUsuario();
             this.onSucessMensage("Sucesso", "Chamado registrado com sucesso!");
           }
         });
+    }
+  }
+
+  atualizar() {
+    if (this.validaAtendimento(this.atendimento)) {
+      this.atendHttpClient
+        .put(DnsWebService.ATENDIMENTO, this.atendimento, false, new Atendimento(), e => {
+          this.onErrorMensage(e.codigo, e.mensagem);
+        })
+        .subscribe(atndReturn => {
+          if (atndReturn.id !== undefined && atndReturn.id !== 0) {
+            this.limpar();
+            this.onSucessMensage("Sucesso", "Chamado atualizado com sucesso!");
+          }
+        });
+    }
+  }
+
+  deletar() {
+    this.deletarAtendimento = false;
+    const dialogRef = this.dialog.open(AtendimentoDeletetarDialogComponent, {
+      width: '250px',
+      data: { value: false, atendimentoComponent: this }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+
+      if (this.deletarAtendimento) {
+        let msg: Mensagem = new Mensagem();
+        this.atendDeltHttpClient
+          .delete(DnsWebService.ATENDIMENTO + '/' + this.atendimento.id, msg, false, new Mensagem(), e => {
+            this.onErrorMensage(e.codigo, e.mensagem);
+          })
+          .subscribe(msgReturn => {
+            if (msgReturn !== undefined &&
+              msgReturn.mensagem !== undefined &&
+              msgReturn.mensagem !== '') {
+              this.onSucessMensage('Sucesso', msgReturn.mensagem);
+              this.limpar();
+            }
+
+          });
+      }
+    });
+  }
+
+  compareObjects(o1: any, o2: any): boolean {
+    if (o1 === undefined || o1.id === undefined) return false;
+    if (o2 === undefined || o2.id === undefined) return false;
+    return o1.id === o2.id;
   }
 
   selecionar(atn: Atendimento) {
-    this.atendimento = atn;
+    this.limpar();
+    this.statusAtendimentoSelecionado = atn.statusAtendimento;
+    this.atendimento = new Atendimento(atn.id,
+      atn.usuario,
+      atn.cliente,
+      atn.horariosAtendimento,
+      atn.statusAtendimento,
+      atn.observacao);
+
+    let length: number = this.atendimento.horariosAtendimento === undefined ? 0 :
+      this.atendimento.horariosAtendimento.length;
+    if (length > 0) {
+
+      this.dataInicioValorForm.setValue(moment(this.atendimento.horariosAtendimento[length - 1].dataInicio, 'YYYY-MM-DDTHH:mm:ssZ'));
+      this.horaInicio = this.atendimento.horariosAtendimento[length - 1].dataInicio.substr(11, 5);
+
+      if (this.atendimento.horariosAtendimento[length - 1].dataFim !== '') {
+        this.dataFimValorForm.setValue(moment(this.atendimento.horariosAtendimento[length - 1].dataFim, ''));
+        this.horaFim = this.atendimento.horariosAtendimento[length - 1].dataFim.substr(11, 5);
+      }
+    }
   }
 
   limpar() {
@@ -169,8 +212,12 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
     this.dataFim = new Date();
     this.horaFim = '00:00';
     this.atendimento = new Atendimento();
-    this.atendimento.horariosAtendimento = new Array<Intervalo>();
-    this.atendimento.horariosAtendimento.push(new Intervalo());
+    this.addIntervalo = false;
+    this.dataInicioValorForm.setValue(undefined);
+    this.dataFimValorForm.setValue(undefined);
+    this.statusAtendimentoSelecionado = StatusAtendimento.Aberto;
+    this.addIntervalo = false;
+    this.buscarAtendimentosIdUsuario();
   }
 
   statusName(s: StatusAtendimento): string {
@@ -180,10 +227,31 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
   onChangePageEvent(p: PageEvent) {
     this.pageEvent = p;
     if (this.textoPesquisa !== undefined && this.textoPesquisa !== '') {
-       this.onChangePesquisar();
-       return;
+      this.onChangePesquisar();
+      return;
     }
     this.buscarAtendimentosIdUsuario();
+  }
+
+  disableSalvar(): boolean {
+    return this.atendimento !== undefined &&
+      this.atendimento !== null &&
+      this.atendimento.id !== undefined &&
+      this.atendimento.id !== null &&
+      this.atendimento.id !== 0;
+  }
+
+  disableAtualizar(): boolean {
+    return this.atendimento !== undefined &&
+      this.atendimento !== null &&
+      this.atendimento.id !== undefined &&
+      this.atendimento.id !== null &&
+      this.disableDeletar();
+  }
+
+  statusAtendimentoSelecionado: StatusAtendimento;
+  disableDeletar(): boolean {
+    return this.statusAtendimentoSelecionado !== undefined && this.statusAtendimentoSelecionado === StatusAtendimento.Fechado;
   }
 
   textoPesquisa: string = '';
@@ -205,7 +273,67 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
       });
   }
 
- 
+  private validaAtendimento(atnd: Atendimento): boolean {
+    let length: number = this.atendimento.horariosAtendimento === undefined ? 0 :
+      this.atendimento.horariosAtendimento.length;
+
+
+    if (this.atendimento.horariosAtendimento === undefined ||
+      this.atendimento.horariosAtendimento.length === 0) {
+      this.atendimento.horariosAtendimento = new Array<Intervalo>();
+      this.atendimento.horariosAtendimento.push(new Intervalo('', ''));
+      length = atnd.horariosAtendimento.length;
+    } else if (this.atendimento.horariosAtendimento[length - 1].dataInicio !== undefined &&
+      this.atendimento.horariosAtendimento[length - 1].dataInicio !== null &&
+      this.atendimento.horariosAtendimento[length - 1].dataInicio !== '' &&
+      this.atendimento.horariosAtendimento[length - 1].dataFim !== undefined &&
+      this.atendimento.horariosAtendimento[length - 1].dataFim !== null &&
+      this.atendimento.horariosAtendimento[length - 1].dataFim !== '' &&
+      !this.addIntervalo) {
+      this.atendimento.horariosAtendimento.push(new Intervalo());
+      length = atnd.horariosAtendimento.length;
+    }
+    this.addIntervalo = true;
+
+    if (this.horaInicio === undefined || this.horaInicio === '00:00') {
+      this.onErrorMensage('Erro', 'Informe a hora de início do atendimento.')
+      return false;
+    } else {
+      atnd.horariosAtendimento[length - 1].dataInicio
+        = moment(this.dataInicio).format('YYYY-MM-DD') + ' ' + this.horaInicio;
+    }
+
+    if (this.horaFim === undefined || this.horaFim === '00:00') {
+      atnd.horariosAtendimento[length - 1].dataFim = '';
+    }
+
+    if (this.dataFim !== undefined && this.horaFim !== undefined && this.horaFim !== '00:00') {
+      atnd.horariosAtendimento[length - 1].dataFim =
+        moment(this.dataFim).format('YYYY-MM-DD') + ' ' + this.horaFim;
+    }
+
+    if (atnd.cliente === undefined) {
+      this.onErrorMensage('Erro', 'Informe o cliente do atendimento.')
+      return false;
+    }
+
+    if (atnd.statusAtendimento === undefined) {
+      this.onErrorMensage('Erro', 'Informe o status do atendimento.')
+      return false;
+    }
+    
+    if (this.atendimento.horariosAtendimento.length >= 2) {
+      if (this.atendimento.horariosAtendimento[0].dataInicio.replace('T','').replace(':00Z','')
+           === this.atendimento.horariosAtendimento[1].dataInicio.replace(' ', '') &&
+        this.atendimento.horariosAtendimento[0].dataFim.replace('T','').replace(':00Z','')
+         === this.atendimento.horariosAtendimento[1].dataFim.replace(' ', '')) {
+        this.atendimento.horariosAtendimento.pop();
+      }
+    }
+
+    atnd.usuario = DnsWebService.usuario;
+    return true;
+  }
 
   private buscarAtendimentosIdUsuario() {
     this.atendPagHttpClient
@@ -259,5 +387,32 @@ export class AtendimentoComponent implements OnInit, AfterViewInit {
 
   limarMsgError() {
     this.msgError = '';
+  }
+}
+
+
+@Component({
+  selector: 'deletar-atendimento-dialog',
+  template: `
+  <h1 mat-dialog-title>Deletar atendimento número {{data.atendimentoComponent.atendimento.id}}</h1>
+  <div mat-dialog-actions>
+    <button mat-button (click)="nao()">Não</button>
+    <button mat-button (click)="sim()">Sim</button>
+  </div>
+  `
+})
+export class AtendimentoDeletetarDialogComponent {
+  constructor(public dialogRef: MatDialogRef<AtendimentoDeletetarDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: DeletarAtendimento) {
+  }
+
+  nao(): void {
+    this.data.atendimentoComponent.deletarAtendimento = false;
+    this.dialogRef.close();
+  }
+
+  sim(): void {
+    this.data.atendimentoComponent.deletarAtendimento = true;
+    this.dialogRef.close();
   }
 }

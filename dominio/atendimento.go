@@ -1,7 +1,10 @@
 package dominio
 
 import (
+	"fmt"
 	"github.com/jinzhu/now"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,6 +23,7 @@ const (
 
 // Intervalo - Data de inicio de um atendimento e data fim.
 type Intervalo struct {
+	ID         int    `json:"id"`
 	DataInicio string `json:"dataInicio"`
 	DataFim    string `json:"dataFim"`
 }
@@ -57,14 +61,14 @@ func NewAtendimento(atnd *Atendimento) *Erro {
 		if err != nil {
 			return &Erro{Codigo: "ATENDIMENTO40", Mensagem: "Erro ao validar data de incio."}
 		}
-		atnd.HorariosAtendimento[i].DataInicio = dtInicio.Format(time.RFC822)
+		atnd.HorariosAtendimento[i].DataInicio = dtInicio.Format(time.RFC3339)
 
 		if atnd.HorariosAtendimento[i].DataFim != "" {
 			dtFim, err := now.Parse(atnd.HorariosAtendimento[i].DataFim)
 			if err != nil || !dtInicio.Before(dtFim) {
 				return &Erro{Codigo: "ATENDIMENTO50", Mensagem: "Erro ao validar data de fim, ou data fim antes da data início."}
 			}
-			atnd.HorariosAtendimento[i].DataFim = dtFim.Format(time.RFC822)
+			atnd.HorariosAtendimento[i].DataFim = dtFim.Format(time.RFC3339)
 		}
 
 		if atnd.StatusAtendimento == Fechado && atnd.HorariosAtendimento[i].DataFim == "" {
@@ -72,5 +76,44 @@ func NewAtendimento(atnd *Atendimento) *Erro {
 		}
 	}
 
+	for i := 1; i < len(atnd.HorariosAtendimento); i++ {
+		dtFimAnt, _ := now.Parse(atnd.HorariosAtendimento[i-1].DataFim)
+		dtInicioAtual, _ := now.Parse(atnd.HorariosAtendimento[i].DataInicio)
+		if replaceDateCompre(dtFimAnt.Format(time.RFC3339), dtInicioAtual.Format(time.RFC3339)) {
+			msg := "Erro ao atualizar atendimento, novo registro de horário anterior ao horário já cadastrado de início " + dtFimAnt.Format(time.RFC822)
+			msg += "."
+			msg += " Histórico de horas já lançadas: "
+			for k := 0; k < len(atnd.HorariosAtendimento)-1; k++ {
+				dtInc, _ := now.Parse(atnd.HorariosAtendimento[i].DataInicio)
+				dtFim, _ := now.Parse(atnd.HorariosAtendimento[i].DataFim)
+				msg += fmt.Sprintf(" %s -> %s; ", timeFomartPtBr(dtInc), timeFomartPtBr(dtFim))
+			}
+			return &Erro{Codigo: "ATENDIMENTO70", Mensagem: msg}
+		}
+	}
+
 	return nil
+}
+
+func replaceDateCompre(dt1, dt2 string) bool {
+	dt1Num, _ := strconv.Atoi(replaceT((replaceZ(dt1))))
+	dt2Num, _ := strconv.Atoi(replaceT((replaceZ(dt2))))
+	return dt2Num <= dt1Num
+}
+
+func replaceT(dt1 string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(dt1, "T", ""), ":", ""), "-", "")
+}
+
+func replaceZ(dt1 string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(dt1, ":00Z", ""), ":00-03:00", "")
+}
+
+func timeFomartPtBr(date time.Time) string {
+	return fmt.Sprintf("%d/%d/%d %d:%d",
+		date.Day(),
+		date.Month(),
+		date.Year(),
+		date.Hour(),
+		date.Minute())
 }

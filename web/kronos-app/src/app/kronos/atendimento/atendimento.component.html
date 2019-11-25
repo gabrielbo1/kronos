@@ -23,30 +23,30 @@
             <div style="flex-direction: column;">
                 <mat-form-field [style.font-size.px]="'15'">
                     <input matInput #dataInicioValor [matDatepicker]="dataInicioPicker"
-                        (dateInput)="onChangeDataInicio(dataInicioValor)" placeholder="In&iacute;cio">
+                        (dateInput)="onChangeDataInicio(dataInicioValor)" placeholder="In&iacute;cio" disabled="{{disableDeletar()}}" [value]="dataInicioValorForm.value">
                     <mat-datepicker-toggle matSuffix [for]="dataInicioPicker"></mat-datepicker-toggle>
                     <mat-datepicker touchUi #dataInicioPicker></mat-datepicker>
                 </mat-form-field>
 
                 <mat-form-field style="margin-left: 10px; margin-right: 5px; width:80px;" [style.font-size.px]="'15'">
-                    <input matInput [(ngModel)]="horaInicio" id="horaInicioId" name="horaInicio" min="00:00" max="23:59"
+                    <input matInput [(ngModel)]="horaInicio" id="horaInicioId" disabled="{{disableDeletar()}}" name="horaInicio" min="00:00" max="23:59"
                         type="time" placeholder="Hora In&iacute;cio">
                 </mat-form-field>
 
                 <mat-form-field [style.font-size.px]="'15'">
                     <input matInput #dataFimValor style="margin-left: 10px;" [matDatepicker]="dataFimPicker"
-                        (dateInput)="onChangeDataFim(dataFimValor)" placeholder="Fim">
+                        (dateInput)="onChangeDataFim(dataFimValor)" placeholder="Fim" disabled="{{disableDeletar()}}" [value]="dataFimValorForm.value">
                     <mat-datepicker-toggle matSuffix [for]="dataFimPicker"></mat-datepicker-toggle>
                     <mat-datepicker touchUi #dataFimPicker></mat-datepicker>
                 </mat-form-field>
 
                 <mat-form-field style="margin-left: 10px; width:80px;" [style.font-size.px]="'15'">
-                    <input matInput [(ngModel)]="horaFim" name="horaFim" type="time" placeholder="Hora Fim">
+                    <input matInput [(ngModel)]="horaFim" name="horaFim" disabled="{{disableDeletar()}}" type="time" placeholder="Hora Fim">
                 </mat-form-field>
 
                 <mat-form-field style="margin-left: 10px; width:150px;" [style.font-size.px]="'15'">
                     <mat-label>Cliente</mat-label>
-                    <mat-select [(ngModel)]="atendimento.cliente" name="cliente">
+                    <mat-select [compareWith]="compareObjects" disabled="{{disableDeletar()}}" [(ngModel)]="atendimento.cliente" name="cliente">
                         <mat-option *ngFor="let cliente of clientsSelects" [value]="cliente.value">
                             {{cliente.viewValue}}
                         </mat-option>
@@ -54,7 +54,7 @@
                 </mat-form-field>
                 <mat-form-field style="margin-left: 10px; width:150px;" [style.font-size.px]="'15'">
                     <mat-label>Status</mat-label>
-                    <mat-select [(ngModel)]="atendimento.statusAtendimento" name="cliente">
+                    <mat-select [(ngModel)]="atendimento.statusAtendimento" disabled="{{disableDeletar()}}"  name="cliente">
                         <mat-option *ngFor="let status of statusSelects" [value]="status.value">
                             {{status.viewValue}}
                         </mat-option>
@@ -63,22 +63,22 @@
             </div>
             <div style="flex-direction: column;">
                 <mat-form-field style="width: 100%;" [style.font-size.px]="'15'">
-                    <textarea matInput [(ngModel)]="atendimento.observacao" type="text"
+                    <textarea matInput [(ngModel)]="atendimento.observacao" disabled="{{disableDeletar()}}" type="text"
                         placeholder="Observa&ccedil;&otilde;es"></textarea>
                 </mat-form-field>
             </div>
         </mat-card-content>
         <mat-card-actions>
-            <button mat-icon-button color="primary"  (click)="cadastro(atendimento)">
+            <button mat-icon-button color="primary" disabled="{{disableSalvar()}}" (click)="cadastro()">
                 <mat-icon>save</mat-icon>
             </button>
-            <button mat-icon-button color="primary">
+            <button mat-icon-button color="primary" disabled="{{disableAtualizar()}}" (click)="atualizar()">
                 <mat-icon>refresh</mat-icon>
             </button>
             <button mat-icon-button color="secondary" (click)="limpar()">
                 <mat-icon>clear_all</mat-icon>
             </button>
-            <button mat-icon-button color="warn">
+            <button mat-icon-button color="warn"  disabled="{{disableDeletar()}}" (click)="deletar()">
                 <mat-icon>delete</mat-icon>
             </button>
         </mat-card-actions>
