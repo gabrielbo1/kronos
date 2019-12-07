@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PontoComponent } from './ponto/ponto.component';
+import { PontoComponent, ConfirmarPontoComponent } from './ponto/ponto.component';
 import { AtendimentoComponent } from './atendimento/atendimento.component';
 import { AtendimentoDeletetarDialogComponent } from './atendimento/atendimento.component';
 import { RelatorioComponent } from './relatorio/relatorio.component';
@@ -24,7 +24,8 @@ import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/
 @NgModule({
   declarations: [
     KronosComponent,
-    PontoComponent, 
+    PontoComponent,
+    ConfirmarPontoComponent, 
     AtendimentoComponent, 
     AtendimentoDeletetarDialogComponent,
     RelatorioComponent, 
@@ -41,7 +42,10 @@ import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/
     }),
     MaterialTimePickerModule,
   ],
-  entryComponents: [AtendimentoComponent, AtendimentoDeletetarDialogComponent],
+  entryComponents: [AtendimentoComponent, 
+                    AtendimentoDeletetarDialogComponent, 
+                    PontoComponent, 
+                    ConfirmarPontoComponent],
   providers: [
     {provide: MAT_DATE_LOCALE, useValue: 'pt-BR'},
     {

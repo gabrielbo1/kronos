@@ -27,10 +27,12 @@ func NewPonto(ponto *Ponto) *Erro {
 	if ponto.Usuario.ID == 0 {
 		return &Erro{Codigo: "PONTO10", Mensagem: "Erro ao registra ponto, identificador do usuário inválido.", Err: nil}
 	}
+
 	if dt, err := now.Parse(ponto.Data); err != nil {
 		return &Erro{Codigo: "PONTO20", Mensagem: "Erro ao realizar parse data ponto.", Err: nil}
 	} else if dt.Before(ontem(time.Now())) || dt.After(amanha(time.Now())) {
-		return &Erro{Codigo: "PONTO30", Mensagem: `Proibido registrar ponto em uma data posterior ou anterior a data atual.`, Err: nil}
+
+		return &Erro{Codigo: "PONTO30", Mensagem: `Proibido registrar ponto em uma data posterior ou anterior a data atual. ` + dt.Format("2006/01/02 15:04"), Err: nil}
 	}
 	return nil
 }

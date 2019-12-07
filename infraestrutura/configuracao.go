@@ -3,6 +3,7 @@ package infraestrutura
 import (
 	"os"
 	"strconv"
+	"time"
 )
 
 // Configuracao - Define parâmetros de configuracao da aplicao.
@@ -53,4 +54,9 @@ func ConfigInit() {
 	if p := os.Getenv("SSL_BANCO"); p != "" {
 		Config.SslBanco = p
 	}
+}
+
+func TimeZonePadrao() *time.Location {
+	localeApp, _ := time.LoadLocation("America/Sao_Paulo")
+	return localeApp
 }

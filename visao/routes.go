@@ -91,6 +91,12 @@ var rotas = Routes{
 		HandlerFunc: DeletePonto,
 	},
 	Route{
+		Name:        "GetPontos",
+		Method:      "GET",
+		Pattern:     "/ponto/data/{idusuario}/{data}",
+		HandlerFunc: GetPontos,
+	},
+	Route{
 		Name:        "PostUsuario",
 		Method:      "POST",
 		Pattern:     "/usuario",

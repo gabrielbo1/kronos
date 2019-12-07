@@ -1,10 +1,11 @@
 package visao
 
 import (
-	"net/http"
-
 	"github.com/gabrielbo1/kronos/aplicacao"
 	"github.com/gabrielbo1/kronos/dominio"
+	"github.com/jinzhu/now"
+	"net/http"
+	"strconv"
 )
 
 // PostPonto - POST Ponto.
@@ -28,6 +29,29 @@ func DeletePonto(w http.ResponseWriter, r *http.Request) {
 		if errDominio = aplicacao.ApagarPonto(&dominio.Ponto{ID: paramInt["id"]}); errDominio == nil {
 			respostaJSON(w, http.StatusOK, respostaPadraoSimples{Mensagem: "Ponto apagado com sucesso!"})
 			return
+		}
+	}
+	respostaJSON(w, http.StatusBadRequest, errDominio)
+}
+
+// GetPontos - Buscar pontos do data.
+func GetPontos(w http.ResponseWriter, r *http.Request) {
+	var errDominio *dominio.Erro
+	var paramUrl map[string]string
+
+	if paramUrl, errDominio = findURLParam(r, []string{"idusuario", "Id usuário não passado erro ao buscar pontos.",
+		"data", "Data não passada erro ao buscar pontos."}); errDominio == nil {
+
+		id, errId := strconv.Atoi(paramUrl["idusuario"])
+		data, errData := now.Parse(paramUrl["data"])
+
+		if errId != nil || errData != nil {
+			errDominio = &dominio.Erro{Codigo: "", Mensagem: `Erro ao avaliar parâmetros buscar pontos.`}
+		} else {
+			if pontos, errDomin := aplicacao.BuscarPontoDia(id, data); errDomin != nil {
+				respostaJSON(w, http.StatusOK, pontos)
+				return
+			}
 		}
 	}
 	respostaJSON(w, http.StatusBadRequest, errDominio)

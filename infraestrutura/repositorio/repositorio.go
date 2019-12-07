@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -213,6 +214,8 @@ type PontoRepositorio interface {
 	Update(tx *sql.Tx, entidade dominio.Ponto) *dominio.Erro
 
 	Delete(tx *sql.Tx, entidade dominio.Ponto) *dominio.Erro
+
+	FindByData(tx *sql.Tx, idUsuario int, time time.Time) ([]dominio.Ponto, *dominio.Erro)
 }
 
 // NewPontoRepositorio - Retorna repositorio de ponto.

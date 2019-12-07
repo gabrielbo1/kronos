@@ -3,6 +3,7 @@ package repositorio
 import (
 	"context"
 	"database/sql"
+	"github.com/jinzhu/now"
 	"log"
 	"strconv"
 	"time"
@@ -43,7 +44,7 @@ func ajustarDataPostgres(dataString string) sql.NullTime {
 
 	var data time.Time
 	var err error
-	if data, err = time.Parse(time.RFC3339, dataString); err != nil {
+	if data, err = now.Parse(dataString); err != nil {
 		return sql.NullTime{}
 	}
 	return sql.NullTime{

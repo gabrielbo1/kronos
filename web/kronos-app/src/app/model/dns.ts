@@ -23,4 +23,6 @@ export class DnsWebService {
     public static ATENDIMENTO : string = '/atendimento';
 
     public static ATENDIMENTO_USUARIO : string = '/atendimento/usuario';
+
+    public static PONTO : string = '/ponto';
 }

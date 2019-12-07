@@ -1,1 +1,27 @@
-<p>ponto works!</p>
+<div fxLayout="row" fxFlex="container" fxLayout.xs="column" fxLayoutAlign="center">
+    <mat-card fxFlex="100%">
+        <mat-card-header fxLayoutAlign="center">
+            <mat-card-title>
+                <h4 class="display-1">
+                    Ponto
+                    <mat-icon aria-hidden="false" color="primary">calendar_today</mat-icon>
+                </h4>
+                <h5 class="display-1">
+                    Horário Atual : {{data.toLocaleString()}}
+                </h5>
+                <div *ngIf="msgError !== ''" (click)="limarMsgError()">
+                    <span [style.font-size.px]="'15'" class="display-4 warn-color">{{msgError}}</span>
+                </div>
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content style="flex-direction: row;">
+            <span [style.font-size.px]="'15'">Pontos de Hoje</span>
+            <span [style.font-size.px]="'15'" *ngFor="let ponto of pontos">{{ponto.data.toLocaleString()}}</span>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-flat-button color="primary" style="width: 100%;" (click)="registrarPonto()">
+                REGISTRAR PONTO<mat-icon>perm_contact_calendar</mat-icon>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>
