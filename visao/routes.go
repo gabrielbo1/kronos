@@ -93,7 +93,7 @@ var rotas = Routes{
 	Route{
 		Name:        "GetPontos",
 		Method:      "GET",
-		Pattern:     "/ponto/data/{idusuario}/{data}",
+		Pattern:     "/ponto/{idusuario}/{data}",
 		HandlerFunc: GetPontos,
 	},
 	Route{

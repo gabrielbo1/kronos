@@ -48,7 +48,7 @@ func GetPontos(w http.ResponseWriter, r *http.Request) {
 		if errId != nil || errData != nil {
 			errDominio = &dominio.Erro{Codigo: "", Mensagem: `Erro ao avaliar parâmetros buscar pontos.`}
 		} else {
-			if pontos, errDomin := aplicacao.BuscarPontoDia(id, data); errDomin != nil {
+			if pontos, errDomin := aplicacao.BuscarPontoDia(id, data); errDomin == nil {
 				respostaJSON(w, http.StatusOK, pontos)
 				return
 			}
