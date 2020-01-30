@@ -2,6 +2,8 @@ package aplicacao
 
 import (
 	"database/sql"
+	"fmt"
+	"github.com/jinzhu/now"
 	"time"
 
 	"github.com/gabrielbo1/kronos/dominio"
@@ -59,5 +61,13 @@ func BuscarPontoDia(idUsuario int, data time.Time) (pontos []dominio.Ponto, errD
 	}); errTX != nil {
 		return pontos, TrataErroConexao(errDominio, errTX)
 	}
+
+	for i := range pontos {
+		if dt, err := now.Parse(pontos[i].Data); err == nil {
+			pontos[i].Data = fmt.Sprintf("%2d/%2d/%d %2d:%2d", dt.Day(), dt.Month(), dt.Year(), dt.Hour(), dt.Minute())
+		}
+
+	}
+
 	return pontos, errDominio
 }

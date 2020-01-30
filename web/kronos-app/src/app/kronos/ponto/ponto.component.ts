@@ -41,6 +41,8 @@ export class PontoComponent implements OnInit, AfterViewInit {
   public pontos: Array<Ponto> = new Array<Ponto>();
   public pontoOk: boolean = false;
   private httpPonto: HttpService<Ponto>;
+  private httpPontos: HttpService<Array<Ponto>>;
+  displayedColumns: string[] = ['data'];
 
   constructor(
     private httpClient: HttpClient,
@@ -50,10 +52,12 @@ export class PontoComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.onViewOk = true;
     atualizaDataAtual(this);
+    this.buscarPontos();
   }
 
   ngOnInit() {
     this.httpPonto = new HttpService<Ponto>(this.httpClient);
+    this.httpPontos = new HttpService<Array<Ponto>>(this.httpClient);
   }
 
   ngOnDestroy() {
@@ -85,9 +89,10 @@ export class PontoComponent implements OnInit, AfterViewInit {
                       })
                       .subscribe(atndReturn => {
                         if (atndReturn.id !== undefined && atndReturn.id !== 0) {
-                          this.limpar();
-                          this.onSucessMensage("Sucesso", "Chamado registrado com sucesso!");
+                          this.onSucessMensage("Sucesso", "Ponto registrado com sucesso!");
                         }
+                        this.limpar();
+                        this.buscarPontos();  
                       });
                 }
               });
@@ -120,6 +125,21 @@ export class PontoComponent implements OnInit, AfterViewInit {
 
   limarMsgError() {
     this.msgError = '';
+  }
+
+  private buscarPontos(): void {
+    let hoje : string = moment(this.data).format('YYYY-MM-DD')  + ' ' +
+                        this.data.toLocaleTimeString();
+    this.httpPontos
+        .get(DnsWebService.PONTO + '/' + DnsWebService.usuario.id.toString() + '/' + hoje,  false, new Array<Ponto>(), (err) => {
+          this.onErrorMensage(err.codigo, err.mensagem);
+        })
+        .subscribe((pontos) => {
+          this.pontos = [];
+          pontos.forEach((p) => {
+              this.pontos.push(p);
+          });
+        });
   }
 }
 

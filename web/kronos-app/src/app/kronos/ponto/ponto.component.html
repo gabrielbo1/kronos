@@ -15,8 +15,20 @@
             </mat-card-title>
         </mat-card-header>
         <mat-card-content style="flex-direction: row;">
-            <span [style.font-size.px]="'15'">Pontos de Hoje</span>
-            <span [style.font-size.px]="'15'" *ngFor="let ponto of pontos">{{ponto.data.toLocaleString()}}</span>
+            <div style="margin-top: 20px;" fxLayout="row" fxFlex="container" fxLayout.xs="column"
+                fxLayoutAlign="center">
+
+                <table mat-table [dataSource]="pontos" class="mat-elevation-z8">
+                    <!-- Position Column -->
+                    <ng-container matColumnDef="data">
+                        <th mat-header-cell *matHeaderCellDef> Pontos Registrados Hoje</th>
+                        <td mat-cell *matCellDef="let element"> {{element.data}} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+            </div>
         </mat-card-content>
         <mat-card-actions>
             <button mat-flat-button color="primary" style="width: 100%;" (click)="registrarPonto()">

@@ -47,4 +47,6 @@ WORKDIR /root/
 WORKDIR /root/static/
 COPY  --from=builderweb /kronos-app/dist .
 WORKDIR /root/
+ENV TZ=America/Sao_Paulo
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 CMD ["./main"]
